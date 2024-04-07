@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/screen/home_screen.dart';
 import 'package:flutter_application_1/theme/theme.dart';
 import 'package:flutter_application_1/widgets/CustomScaffold.dart';
 
@@ -46,7 +47,10 @@ class _SignState extends State<SignInScreen> {
 
           if (hashedPassword == storedPassword) {
             print("User LoggedIn Successfully!");
-            
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const HomePage()),
+            );
           } else {
             print("Incorrect password!");
           }
