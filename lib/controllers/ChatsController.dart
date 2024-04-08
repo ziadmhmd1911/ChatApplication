@@ -14,7 +14,7 @@ class ChatsController {
   Future<List<Chats>> getChats(String user) async {
     QuerySnapshot snapshot = await chatRooms
       .where('participants', arrayContains: user)
-      .orderBy('lastMessageTime', descending: true)
+      .orderBy('lastMessageTime', descending: false)
       .get();
     List<Chats> chatList = [];
     snapshot.docs.forEach((doc) {
@@ -28,18 +28,19 @@ class ChatsController {
   }
 
 
-  Future<void> createChatWithMessage(String sender, String receiver, String messageText) {
+  Future<void> createChatWithMessage(List<String> participants, String messageText, String? messageType) {
     // Create a new chat document in 'chatRooms' collection
     chatRooms.add({
-      'participants': [sender, receiver],
+      'participants': participants,
       'lastMessage': messageText,
       'lastMessageTime': DateTime.now()
     }).then((docRef) {
       // Add the first message to this chat's 'messages' subcollection
       docRef.collection('messages').add({
-        'sender': sender,
-        'receiver': receiver,
+        'sender': participants[0],
+        'type': messageType ?? 'text',
         'text': messageText,
+        'seen': false, 
         'time': DateTime.now(),
       }).then((value) => print('message added successfully')).catchError((error) => print(error));
     }).catchError((error) => print(error));
@@ -74,7 +75,7 @@ void main() async {
   await chatsController.createChatWithMessage();*/
 
   // Test getChats
-  List<Chats> chatList = await chatsController.getChats();
+  List<Chats> chatList = await chatsController.getChats('ehab');
   chatList.forEach((chat) {
     print(chat.participants);
     print(chat.lastMessage);
