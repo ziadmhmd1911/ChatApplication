@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: lightMode,
-      home: HomePage(),
+      home: WelcomeScreen(),
     );
   }
 }
