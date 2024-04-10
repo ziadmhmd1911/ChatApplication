@@ -15,6 +15,7 @@ class LoggedUser{
   //this method is only be called once
   void setAttributes(String fullName, String gender, String phoneNumber){
     if(_isLogged) {
+      print('LoggedUser attributes are already set');
       return;
     }
     

@@ -46,6 +46,31 @@ class ChatsController {
     }).catchError((error) => print(error));
     return Future(() => null);
   }
+
+  //search for name that starts with the entered string
+  Future<List<Chats>> searchForChat(String enteredString) async {
+    enteredString = enteredString.trim();
+    QuerySnapshot snapshot = await chatRooms
+    //search for the entered string and logggedUser.fullname in the participants array
+      .where('participants', arrayContains: loggedUser.fullName)
+      .orderBy('lastMessageTime', descending: false)
+      .get();
+    List<Chats> chatList = [];
+    snapshot.docs.forEach((doc) {
+      List<String> participants = doc['participants'].cast<String>();
+      if((doc['participants'][0] == loggedUser.fullName && participants[1].startsWith(enteredString)) || 
+      (doc['participants'][1] == loggedUser.fullName && participants[0].startsWith(enteredString)))
+      {
+        Chats chat = Chats(participants: participants, 
+                          lastMessage: doc['lastMessage'], 
+                          lastMessageTime: doc['lastMessageTime'].toDate()
+                          );
+        chatList.add(chat);
+      }
+    });
+    return chatList;
+
+  }
 }
 
 // create main function to test the code
@@ -73,9 +98,11 @@ void main() async {
   // wait for 2 seconds
   await Future.delayed(Duration(seconds: 2));
   await chatsController.createChatWithMessage();*/
+  LoggedUser loggedUser = LoggedUser();
+  loggedUser.setAttributes('ehab', 'male', '01093937083');
 
   // Test getChats
-  List<Chats> chatList = await chatsController.getChats('ehab');
+  List<Chats> chatList = await chatsController.searchForChat('m');
   chatList.forEach((chat) {
     print(chat.participants);
     print(chat.lastMessage);
