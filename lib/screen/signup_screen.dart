@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,46 +9,57 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/screen/signin_screen.dart';
 import 'package:flutter_application_1/theme/theme.dart';
 import 'package:flutter_application_1/widgets/CustomScaffold.dart';
-// Line 240 Signup 
+
 class SignUpScreen extends StatefulWidget {
-  const SignUpScreen({super.key});
+  const SignUpScreen({Key? key});
 
   @override
-  State<SignUpScreen> createState() => _SignState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _SignState extends State<SignUpScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   final _formSignupKey = GlobalKey<FormState>();
   bool agreePersonalData = true;
   String? gender;
   TextEditingController fullName = TextEditingController();
   TextEditingController password = TextEditingController();
   TextEditingController phone = TextEditingController();
-
+  TextEditingController email = TextEditingController();
 
   CollectionReference users = FirebaseFirestore.instance.collection('users');
-    String hashPassword(String password) {
-      // Convert password to bytes
-      Uint8List passwordBytes = utf8.encode(password);
 
-      // Hash the password using SHA-256
-      Digest hashedPassword = sha256.convert(passwordBytes);
+  String hashPassword(String password) {
+    // Convert password to bytes
+    Uint8List passwordBytes = utf8.encode(password);
 
-      // Return the hashed password as a string
-      return hashedPassword.toString();
-    }
+    // Hash the password using SHA-256
+    Digest hashedPassword = sha256.convert(passwordBytes);
 
-      Future<void> addUser() {
-        String hashedPassword = hashPassword(password.text);
-      return users
-          .add({
-            'full_name': fullName.text, // John Doe
-            'password': hashedPassword, // Stokes and Sons
-            'phone': phone.text, // 42
-            'gender' : gender
-          })
-          .then((value) => print("User Added"))
-          .catchError((error) => print("Failed to add user: $error"));
+    // Return the hashed password as a string
+    return hashedPassword.toString();
+  }
+
+    Future<void> addUser() async {
+      String hashedPassword = hashPassword(password.text); // Assuming hashPassword function is defined elsewhere
+      try {
+        UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: email.text,
+          password: hashedPassword,
+        );
+        // After successful user creation, you can save additional user information to Firestore or other databases if needed.
+        // For example, if you're using Cloud Firestore:
+        await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).set({
+          'email': email.text,
+          'full_name': fullName.text, // John Doe
+          'phone': phone.text,
+          'gender': gender,
+          //Add Id
+          'Id': userCredential.user?.uid,
+        });
+        print("User Added");
+      } catch (error) {
+        print("Failed to add user: $error");
+      }
     }
 
   @override
@@ -132,18 +142,57 @@ class _SignState extends State<SignUpScreen> {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your phone number';
                           }
-                          
+
                           // Check if the entered value is a valid 11-digit number
                           if (!RegExp(r'^[0-9]{11}$').hasMatch(value)) {
                             return 'Please enter a valid 11-digit phone number';
                           }
-                          
+
                           return null;
                         },
                         keyboardType: TextInputType.phone, // This will show the numeric keyboard
                         decoration: InputDecoration(
                           label: const Text('Phone Number'),
                           hintText: 'Enter your phone number',
+                          hintStyle: const TextStyle(
+                            color: Colors.black26,
+                          ),
+                          border: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                              color: Colors.black12, // Default border color
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                              color: Colors.black12, // Default border color
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 25.0,
+                      ),
+                      // Email
+                      TextFormField(
+                        controller: email,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your email';
+                          }
+
+                          // Check if the entered value is a valid email address
+                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                            return 'Please enter a valid email address';
+                          }
+
+                          return null;
+                        },
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          label: const Text('Email'),
+                          hintText: 'Enter your email',
                           hintStyle: const TextStyle(
                             color: Colors.black26,
                           ),
@@ -369,7 +418,7 @@ class _SignState extends State<SignUpScreen> {
                       ),
                       const SizedBox(
                         height: 20.0,
-                      ),                                        
+                      ),
                     ],
                   ),
                 ),
