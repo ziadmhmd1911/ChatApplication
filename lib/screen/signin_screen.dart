@@ -8,12 +8,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screen/home_screen.dart';
 import 'package:flutter_application_1/theme/theme.dart';
 import 'package:flutter_application_1/widgets/CustomScaffold.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+// import home screen
+import 'home_screen.dart';
+//import chatService
+import 'package:flutter_application_1/chat/chat_service.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
 
   @override
   State<SignInScreen> createState() => _SignState();
+}
+  String currentUserName = "";
+
+// Function to get loggedin user username
+String loggedinuser() {
+  return currentUserName;
 }
 
 class _SignState extends State<SignInScreen> {
@@ -35,31 +46,31 @@ class _SignState extends State<SignInScreen> {
       return hashedPassword.toString();
     }
 
-  Future<void> loginUser() {
-  return users
-      .where('full_name', isEqualTo: userName.text)
-      .get()
-      .then((QuerySnapshot querySnapshot) {
-        if (querySnapshot.docs.isNotEmpty) {
-          // User with the given full_name exists, check the password
-          String hashedPassword = hashPassword(password.text);
-          String storedPassword = querySnapshot.docs[0]['password'];
+  Future<void> loginUser(BuildContext context) async {
+  try {
+    //Unhash Password
+    String unhashedPassword = hashPassword(password.text);
+    UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      email: userName.text,
+      password: unhashedPassword,
+    );
 
-          if (hashedPassword == storedPassword) {
-            print("User LoggedIn Successfully!");
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const HomePage()),
-            );
-          } else {
-            print("Incorrect password!");
-          }
-        } else {
-          print("User not found!");
-        }
-      })
-      .catchError((error) => print("Failed to login user: $error"));
+    // If login is successful, print a success message
+    print("User LoggedIn Successfully!");
+
+    // Navigate to the home screen and send user name
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomePage(userName: userName.text),
+      ),
+    );
+  } catch (error) {
+    // Handle login errors
+    print("Failed to login user: $error");
+  }
 }
+
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
@@ -182,7 +193,7 @@ class _SignState extends State<SignInScreen> {
                               ),
                             ),
                           ],
-                        ),         
+                        ),
                       ],
                     ),
                       GestureDetector(
@@ -201,7 +212,7 @@ class _SignState extends State<SignInScreen> {
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () {
-                            loginUser();
+                            loginUser(context);
                             if (_formSignInKey.currentState!.validate() &&
                                 rememberPassword) {
                               ScaffoldMessenger.of(context).showSnackBar(
