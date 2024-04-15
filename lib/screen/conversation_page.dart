@@ -1,121 +1,251 @@
+import 'dart:io';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screen/my_drawer.dart';
+import 'package:flutter_application_1/chat/chat_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:record/record.dart';
+import 'package:uuid/uuid.dart';
+import 'package:path/path.dart';
 
-class ConversationPage extends StatefulWidget {
-  final int chatIndex;
 
-  const ConversationPage({Key? key, required this.chatIndex}) : super(key: key);
+class ChatPage extends StatefulWidget {
+  final String receiverUserId;
+  final String receiverUserEmail;
+
+  const ChatPage({
+    Key? key,
+    required this.receiverUserId,
+    required this.receiverUserEmail,
+  }) : super(key: key);
 
   @override
-  _ConversationPageState createState() => _ConversationPageState();
+  _ChatPageState createState() => _ChatPageState();
 }
 
-class _ConversationPageState extends State<ConversationPage> {
-  final TextEditingController _textController = TextEditingController();
-  List<String> _messages = [];
+class _ChatPageState extends State<ChatPage> {
+  final TextEditingController _messageController = TextEditingController();
+  final ChatService _chatService = ChatService();
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final record = AudioRecorder();
+  late AudioPlayer audioPlayer;
+  String path = '';
+  String url = '';
+  bool isRecording = false;
+  bool isPlaying = false;
+  AudioPlayer newAudioPlayer = AudioPlayer();
+
+  startRecord() async {
+    final location = await getApplicationDocumentsDirectory();
+    String name = Uuid().v1();
+    if (await record.hasPermission()) {
+      setState(() {
+        isRecording = true;
+      });
+      await record.start(RecordConfig(), path: '${location.path}/$name.m4a');
+    }
+    print("Recording Started");
+  }
+
+  stopRecord() async {
+    String? finalPath = await record.stop();
+    setState(() {
+      path = finalPath!;
+      isRecording = false;
+    });
+    print("Recording Stopped");
+    upload(); // Await upload function call
+  }
+
+  upload() async {
+    String name = basename(path);
+    final ref = FirebaseStorage.instance.ref('Voice'+name);
+    await ref.putFile(File(path!));
+    String downloadUrl = await ref.getDownloadURL();
+    setState(() {
+      url = downloadUrl;
+    });
+    print("Uploaded");
+  }
+
+  play(url) async {
+    await newAudioPlayer.play(url);
+    setState(() {
+      isPlaying = true;
+    });
+    print("Audio Playing!!");
+  }
+
+  void sendMessage() async {
+    if (_messageController.text.isNotEmpty) {
+      await _chatService.SendMessage(widget.receiverUserId, _messageController.text);
+      _messageController.clear();
+    }
+  }
+
+  void sendVoice() async {
+    if (url.startsWith('https://firebasestorage.googleapis.com/')) {
+      await _chatService.SendMessage(widget.receiverUserId, url);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Replace these with actual receiver data
-    String receiverName = 'Jane Doe';
-    String receiverProfilePictureUrl = 'https://example.com/receiver_profile.jpg';
-
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            CircleAvatar(
-              radius: 20,
-              backgroundImage: NetworkImage(receiverProfilePictureUrl),
+      appBar: AppBar(title: Text(widget.receiverUserEmail)),
+      body: Column(
+        children: [
+          Expanded(
+            child: _buildMessageList(),
+          ),
+          _buildMessageInput(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMessageList() {
+    return StreamBuilder(
+      stream: _chatService.getMessages(widget.receiverUserId, _firebaseAuth.currentUser!.uid),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Text('Error${snapshot.error}');
+        }
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        List<DocumentSnapshot> messages = snapshot.data!.docs.reversed.toList();
+
+        return ListView.builder(
+          reverse: false, // Display the list in reverse order
+          itemCount: messages.length,
+          itemBuilder: (context, index) {
+            if (messages[index]['message'].startsWith('https://firebasestorage.googleapis.com/')) {
+              return VoiceMessageBubble(
+                messageUrl: messages[index]['message'],
+                isSent: messages[index]['senderId'] == _firebaseAuth.currentUser!.uid,
+                time: _formatTimestamp(messages[index]['timestamp']),
+              );
+            } else {
+              return TextMessageBubble(
+                message: messages[index]['message'],
+                isSent: messages[index]['senderId'] == _firebaseAuth.currentUser!.uid,
+                time: _formatTimestamp(messages[index]['timestamp']),
+              );
+            }
+          },
+        );
+      },
+    );
+  }
+
+  String _formatTimestamp(Timestamp timestamp) {
+    DateTime dateTime = timestamp.toDate();
+    String formattedTime = '${dateTime.hour}:${dateTime.minute}:${dateTime.second}'; // Format hours, minutes, and seconds
+    return formattedTime;
+  }
+
+  Widget _buildMessageInput() {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      color: Colors.grey[200],
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _messageController,
+              decoration: const InputDecoration(
+                hintText: 'Enter your message',
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              ),
             ),
-            SizedBox(width: 10),
-            Text(receiverName),
-          ],
-        ),
-        actions: [
+          ),
           IconButton(
-            icon: Icon(Icons.call),
+            icon: const Icon(Icons.send),
+            onPressed: sendMessage,
+          ),
+          IconButton(
+            icon: const Icon(Icons.mic),
+            onPressed: startRecord,
+          ),
+          IconButton(
+            icon: const Icon(Icons.stop),
             onPressed: () {
-              // Implement call functionality
+              stopRecord();
+              sendVoice();
             },
           ),
         ],
       ),
-      body: Column(
-        children: <Widget>[
-          Flexible(
-            child: ListView.builder(
-              padding: EdgeInsets.all(8.0),
-              reverse: true,
-              itemCount: _messages.length,
-              itemBuilder: (BuildContext context, int index) {
-                return ChatBubble(
-                  message: _messages[index],
-                  isSent: index.isEven,
-                  time: '10:00 AM', // Replace with actual message timestamp
-                );
-              },
-            ),
-          ),
-          Divider(height: 1.0),
-          Container(
-            decoration: BoxDecoration(color: Theme.of(context).cardColor),
-            child: _buildTextComposer(context),
-          ),
-        ],
-      ),
-      drawer: const MyDrawer(),
     );
   }
+}
 
-  Widget _buildTextComposer(BuildContext context) {
-    return IconTheme(
-      data: IconThemeData(color: Theme.of(context).primaryColor),
+class VoiceMessageBubble extends StatelessWidget {
+  final String messageUrl;
+  final bool isSent;
+  final String time;
+
+  const VoiceMessageBubble({
+    Key? key,
+    required this.messageUrl,
+    required this.isSent,
+    required this.time,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: isSent ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 8.0),
-        child: Row(
-          children: <Widget>[
-            Flexible(
-              child: TextField(
-                controller: _textController,
-                onSubmitted: _handleSubmitted,
-                decoration: InputDecoration.collapsed(hintText: 'Send a message'),
-              ),
+        margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+        decoration: BoxDecoration(
+          color: isSent ? Colors.green : Colors.grey[300],
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                IconButton(
+                  icon: Icon(Icons.play_arrow),
+                  onPressed: () {
+                    final Player = AudioPlayer();
+                    Player.play(UrlSource(messageUrl));
+                  },
+                ),
+                SizedBox(width: 8),
+                Text(
+                  '',
+                  style: TextStyle(color: isSent ? Colors.white : Colors.black),
+                ),
+              ],
             ),
-            IconButton(
-              icon: Icon(Icons.send),
-              onPressed: () {
-                _handleSubmitted(_textController.text);
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.mic),
-              onPressed: _startRecording, // Call method to start recording voice notes
+            SizedBox(height: 5),
+            Text(
+              time,
+              style: TextStyle(fontSize: 12, color: Colors.grey),
             ),
           ],
         ),
       ),
     );
   }
-
-  void _handleSubmitted(String text) {
-    _textController.clear();
-    setState(() {
-      _messages.insert(0, text); // Insert message at the beginning of the list
-    });
-  }
-
-  void _startRecording() {
-    // Implement method to start recording voice notes
-  }
 }
 
-class ChatBubble extends StatelessWidget {
+class TextMessageBubble extends StatelessWidget {
   final String message;
   final bool isSent;
   final String time;
 
-  const ChatBubble({
+  const TextMessageBubble({
     Key? key,
     required this.message,
     required this.isSent,

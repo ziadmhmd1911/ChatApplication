@@ -131,7 +131,7 @@ class SettingsScreen extends StatelessWidget {
           ),
         ],
       ),
-      drawer: const MyDrawer(),
+      drawer: MyDrawer(),
     );
   }
 }
