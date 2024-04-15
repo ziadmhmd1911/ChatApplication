@@ -1,11 +1,10 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
+import 'package:speech_to_text/speech_to_text.dart'; // Import speech_to_text package
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screen/home_screen.dart';
 import 'package:flutter_application_1/theme/theme.dart';
 import 'package:flutter_application_1/widgets/CustomScaffold.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -54,22 +53,62 @@ class _SignState extends State<SignInScreen> {
       email: userName.text,
       password: unhashedPassword,
     );
+    // Get the user name from the database
+    final user = FirebaseAuth.instance.currentUser;
+    final userDocument = await users.doc(user!.uid).get();
+    currentUserName = userDocument['full_name'];
 
     // If login is successful, print a success message
     print("User LoggedIn Successfully!");
-
     // Navigate to the home screen and send user name
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => HomePage(userName: userName.text),
+        builder: (context) => HomePage(userName: currentUserName),
       ),
     );
+    startListening();
   } catch (error) {
     // Handle login errors
     print("Failed to login user: $error");
   }
 }
+
+void startListening() {
+  SpeechToText _speech = SpeechToText();
+
+  _speech.initialize().then((_) {
+    if (_speech.isAvailable) {
+      // Define a function to handle speech recognition
+      void listenForSpeech() {
+        _speech.listen(
+          localeId: 'ar', // Specify Arabic locale
+          onResult: (result) {
+            if (result.finalResult) {
+              print("You said: ${result.recognizedWords}");
+              // Handle the recognized speech here
+              if (result.recognizedWords == "السلام عليكم") {
+                _speech.stop();
+                print("Speech recognition stopped.");
+              } else {
+                // If the phrase is not recognized, continue listening
+                listenForSpeech();
+              }
+            }
+          },
+        );
+      }
+
+      // Start listening for speech
+      listenForSpeech();
+    } else {
+      print("Speech recognition not available");
+    }
+  }).catchError((error) {
+    print("Error initializing speech recognition: $error");
+  });
+}
+
 
   @override
   Widget build(BuildContext context) {

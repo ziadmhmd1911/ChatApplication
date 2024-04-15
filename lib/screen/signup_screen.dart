@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -106,6 +105,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                       // full name
                       TextFormField(
+                        controller: fullName,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter Full name';
@@ -135,8 +135,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       const SizedBox(
                         height: 25.0,
                       ),
-                      // email
+                      // Phone number
                       TextFormField(
+                        controller: phone,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your phone number';
@@ -214,6 +215,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                       // password
                       TextFormField(
+                        controller: password,
                         obscureText: true,
                         obscuringCharacter: '*',
                         validator: (value) {
@@ -244,63 +246,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                       const SizedBox(
                         height: 25.0,
-                      ),                      
-                        // Add place to add a photo
-                        GestureDetector(
-                        onTap: () async {
-                          // Open the device's photo gallery
-                          // ignore: deprecated_member_use
-                          final pickedFile = await ImagePicker().getImage(source: ImageSource.gallery);
-                          // Check if a photo was selected
-                          if (pickedFile != null) {
-                            // You can use the pickedFile.path to access the selected photo's path
-                            // For now, let's just print the path
-                            print('Selected image path: ${pickedFile.path}');
-                          } else {
-                            print('No image selected.');
-                          }
-                        },
-                        child:Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 100,
-                            height: 100,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(50),
-                            ),
-                            child: Icon(
-                              Icons.add_a_photo,
-                              size: 50,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            'Add Photo',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.primary,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                      const SizedBox(
-                        height: 15.0,
                       ),
                       // gender selection
-                      Text(
+                      const Text(
                         'Select Gender',
                         style: TextStyle(
                           fontSize: 18.0,
                           fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
+                          color: Colors.black,
                         ),
                       ),
                       const SizedBox(
-                        height: 5.0,
+                        height: 15.0,
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -339,10 +296,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             },
                             activeColor: lightColorScheme.primary,
                           ),
-                          Text(
+                          const Text(
                             'I agree to the processing of ',
                             style: TextStyle(
-                              color: Theme.of(context).colorScheme.primary,
+                              color: Colors.black45,
                             ),
                           ),
                           Text(
@@ -362,6 +319,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () {
+                            addUser();
                             if (_formSignupKey.currentState!.validate() &&
                                 agreePersonalData) {
                               ScaffoldMessenger.of(context).showSnackBar(

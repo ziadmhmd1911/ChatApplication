@@ -86,7 +86,7 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void sendVoice() async {
-    if (url != '') {
+    if (url.startsWith('https://firebasestorage.googleapis.com/')) {
       await _chatService.SendMessage(widget.receiverUserId, url);
     }
   }

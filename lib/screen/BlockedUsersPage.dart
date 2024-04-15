@@ -59,7 +59,7 @@ class _BlockedUsersPageState extends State<BlockedUsersPage> {
         data: Theme.of(context).copyWith(
           canvasColor: Colors.white, // Change drawer background color here
         ),
-        child: const MyDrawer(),
+        child: MyDrawer(),
       ),
     );
   }

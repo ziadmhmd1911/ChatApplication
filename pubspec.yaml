@@ -49,6 +49,7 @@ dependencies:
   microphone: 0.1.0
   record: ^5.0.5
   firebase_storage: ^11.7.0
+  speech_to_text: ^6.6.0
 
 dev_dependencies:
   flutter_test:

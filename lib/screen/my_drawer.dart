@@ -8,6 +8,7 @@ class MyDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String userName = "Ahmed";
     return Drawer(
       backgroundColor: Theme.of(context).colorScheme.secondary,
       child: Column(
@@ -29,7 +30,7 @@ class MyDrawer extends StatelessWidget {
               title: Text('Home',style: TextStyle(color: Theme.of(context).colorScheme.background),),
               leading: Icon(Icons.home,color: Theme.of(context).colorScheme.background,),
               onTap: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context)=> HomePage()));
+                Navigator.push(context, MaterialPageRoute(builder: (context)=> HomePage(userName: userName)));
               },
             ),
           ),
