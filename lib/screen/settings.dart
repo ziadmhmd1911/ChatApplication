@@ -89,7 +89,7 @@ class SettingsScreen extends StatelessWidget {
                 builder: (BuildContext context) {
                   return AlertDialog(
                     title: Text("Help", style: TextStyle(color: Theme.of(context).colorScheme.primary),), // Changed color to white
-                    content: Text("This is the help message.", style: TextStyle(color: Theme.of(context).colorScheme.primary),), // Changed color to white
+                    content: Text("Need help? Contact our support team at support@gmail.com.", style: TextStyle(color: Theme.of(context).colorScheme.primary),), // Changed color to white
                     actions: [
                       TextButton(
                         onPressed: () {
@@ -115,7 +115,7 @@ class SettingsScreen extends StatelessWidget {
                 builder: (BuildContext context) {
                   return AlertDialog(
                     title: Text("Invite", style: TextStyle(color: Theme.of(context).colorScheme.primary),), // Changed color to white
-                    content: Text("This is the invite message.", style: TextStyle(color: Theme.of(context).colorScheme.primary),), // Changed color to white
+                    content: Text("Join our chat app and start connecting with friends! Download it now from the App Store or Google Play Store.", style: TextStyle(color: Theme.of(context).colorScheme.primary),), // Changed color to white
                     actions: [
                       TextButton(
                         onPressed: () {

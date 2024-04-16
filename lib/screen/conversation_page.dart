@@ -94,13 +94,36 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.receiverUserEmail)),
-      body: Column(
+      appBar: AppBar(
+        title: Text(widget.receiverUserEmail),
+        backgroundColor: Theme.of(context).colorScheme.background,
+        actions: [
+          IconButton(
+            onPressed: () {
+              // Add your call functionality here
+            },
+            icon: Icon(Icons.call), // Use the call icon
+          ),
+        ],
+      ),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Background image
+          Image.asset(
+            'images/bk.png',
+            fit: BoxFit.cover,
+            width: double.infinity, 
+            height: double.infinity,
+          ),
+      Column(
         children: [
           Expanded(
             child: _buildMessageList(),
           ),
           _buildMessageInput(),
+            ],
+          ),
         ],
       ),
     );
@@ -260,7 +283,7 @@ class TextMessageBubble extends StatelessWidget {
         margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
         padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
         decoration: BoxDecoration(
-          color: isSent ? Colors.green : Colors.grey[300],
+          color: isSent ? Color(0xFF8E4DB2) : Colors.white70,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
@@ -273,11 +296,23 @@ class TextMessageBubble extends StatelessWidget {
             SizedBox(height: 5),
             Text(
               time,
-              style: TextStyle(fontSize: 12, color: Colors.grey),
+              style: TextStyle(fontSize: 12, color: isSent ? Colors.white : Colors.black),
             ),
+            SizedBox(height: 5),
+            TextButton(
+              onPressed: () {
+                // Function to be executed when the button is pressed
+                _onButtonPressed(context);
+              }, child: Text('change to voice'),
+            )
           ],
         ),
       ),
     );
   }
 }
+  void _onButtonPressed(BuildContext context) {
+    // Add your custom function here to be executed when the button is pressed
+    print("Button pressed!");
+    // You can add any other functionality you want here
+  }

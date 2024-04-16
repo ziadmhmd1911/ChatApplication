@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:flutter_application_1/screen/signup_screen.dart';
 import 'package:speech_to_text/speech_to_text.dart'; // Import speech_to_text package
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
@@ -151,24 +152,29 @@ void startListening() {
                         controller: userName,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter Email';
+                            return 'Please enter an email';
+                          }
+                          // Regular expression for email validation
+                          bool isValidEmail = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value);
+                          if (!isValidEmail) {
+                            return 'Please enter a valid email';
                           }
                           return null;
                         },
                         decoration: InputDecoration(
-                          label: const Text('Username'),
-                          hintText: 'Username',
-                          hintStyle: const TextStyle(
+                          labelText: 'Email',
+                          hintText: 'Email',
+                          hintStyle: TextStyle(
                             color: Colors.black26,
                           ),
                           border: OutlineInputBorder(
-                            borderSide: const BorderSide(
+                            borderSide: BorderSide(
                               color: Colors.black12, // Default border color
                             ),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
+                            borderSide: BorderSide(
                               color: Colors.black12, // Default border color
                             ),
                             borderRadius: BorderRadius.circular(10),
@@ -273,7 +279,7 @@ void startListening() {
                       const SizedBox(
                         height: 25.0,
                       ),
-                      Row(
+                      /*Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Expanded(
@@ -304,7 +310,39 @@ void startListening() {
                       ),
                     const SizedBox(
                       height: 25.0,
-                    ),
+                    ),*/
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'Don\'t have an account?',
+                            style: TextStyle(
+                              color: Colors.black45,
+                            ),
+                          ),
+                              SizedBox(width: 5), 
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (e) => const SignUpScreen(),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              'Sign up',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: lightColorScheme.primary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 20.0,
+                    )
                   ],                   
                 ),                
               ),                            

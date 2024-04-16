@@ -113,8 +113,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           return null;
                         },
                         decoration: InputDecoration(
-                          label: const Text('Full Name'),
-                          hintText: 'Enter Full Name',
+                          label: const Text('Username'),
+                          hintText: 'Enter your Username',
                           hintStyle: const TextStyle(
                             color: Colors.black26,
                           ),
@@ -342,7 +342,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         height: 30.0,
                       ),
                       // sign up divider
-                      Row(
+                      /*Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Expanded(
@@ -383,7 +383,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           //Logo(Logos.google),
                           //Logo(Logos.apple),
                         ],
-                      ),
+                      ),*/  
                       const SizedBox(
                         height: 25.0,
                       ),
@@ -396,7 +396,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             style: TextStyle(
                               color: Colors.black45,
                             ),
-                          ),
+                          ), 
                           GestureDetector(
                             onTap: () {
                               Navigator.push(
