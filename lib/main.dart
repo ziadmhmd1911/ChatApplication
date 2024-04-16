@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'ConnectAll',
       theme: lightMode,
-      home: SettingsScreen(),
+      home: WelcomeScreen(),
     );
   }
 }

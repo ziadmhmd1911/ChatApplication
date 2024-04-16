@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/controllers/VoiceAssistantController.dart';
 import 'package:flutter_application_1/screen/conversation_page.dart'; // Import the ConversationPage widget
 import 'package:flutter_application_1/screen/my_drawer.dart';
 import 'package:flutter_application_1/screen/signin_screen.dart';
@@ -17,6 +18,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String formattedTime = DateFormat('h:mm:ss a').format(DateTime.now());
+    VoiceAssitantController.setContext(context);
 
     Future<List<Map<String, String>>> getAllUserData(String currentUser) async {
       final firestore = FirebaseFirestore.instance;
