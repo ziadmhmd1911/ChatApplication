@@ -27,6 +27,16 @@ class LoggedUser{
     _phoneNumber = phoneNumber;
     _email = email;
     _id = id;
+    print('LoggedUser attributes are set');
+  }
+
+  void logOut(){
+    _isLogged = false;
+    _fullName = '';
+    _email = '';
+    _gender = '';
+    _phoneNumber = '';
+    _id = '';
   }
 
   // add getters for the attributes

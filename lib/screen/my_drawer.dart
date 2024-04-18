@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/loggedUser.dart';
 import 'package:flutter_application_1/screen/home_screen.dart';
 import 'package:flutter_application_1/screen/settings.dart';
 import 'package:flutter_application_1/screen/signin_screen.dart';
@@ -55,6 +56,7 @@ class MyDrawer extends StatelessWidget {
               title: Text('Log Out',style: TextStyle(color: Theme.of(context).colorScheme.background),),
               leading: Icon(Icons.logout,color: Theme.of(context).colorScheme.background,),
               onTap: (){
+                LoggedUser().logOut();
                 Navigator.push(context, MaterialPageRoute(builder: (context)=>const SignInScreen()));},
             ),
           ),

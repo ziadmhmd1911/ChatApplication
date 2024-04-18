@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:flutter_application_1/controllers/VoiceAssistantController.dart';
+import 'package:flutter_application_1/models/loggedUser.dart';
 import 'package:flutter_application_1/screen/signup_screen.dart';
 import 'package:speech_to_text/speech_to_text.dart'; // Import speech_to_text package
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -58,6 +60,8 @@ class _SignState extends State<SignInScreen> {
     final user = FirebaseAuth.instance.currentUser;
     final userDocument = await users.doc(user!.uid).get();
     currentUserName = userDocument['full_name'];
+    LoggedUser loggedUser = LoggedUser();
+    loggedUser.setAttributes(userDocument['full_name'], userDocument['gender'], userDocument['phone'], userDocument['email'],userDocument['Id']);
 
     // If login is successful, print a success message
     print("User LoggedIn Successfully!");
@@ -75,18 +79,29 @@ class _SignState extends State<SignInScreen> {
   }
 }
 
-void startListening() {
+void startListening() async {
   SpeechToText _speech = SpeechToText();
-
-  _speech.initialize().then((_) {
+  bool speechSuccess = await _speech.initialize();
+  if(speechSuccess){
     if (_speech.isAvailable) {
       // Define a function to handle speech recognition
-      void listenForSpeech() {
+      bool noAssist = true;
+      void listenForSpeech() async {
         _speech.listen(
           localeId: 'ar', // Specify Arabic locale
-          onResult: (result) {
+          onResult: (result) async {
             if (result.finalResult) {
               print("You said: ${result.recognizedWords}");
+              if(result.recognizedWords == "مرحبا مساعدي" && noAssist){
+                noAssist = false;
+              } 
+              else if(!noAssist){
+                noAssist = true;
+                VoiceAssitantController voiceAssistant = VoiceAssitantController();
+                Map<String, dynamic> response = await voiceAssistant.getCommandAndName(result.recognizedWords);
+                print(response);
+                voiceAssistant.excuteCommand(response);
+              }
               // Handle the recognized speech here
               if (result.recognizedWords == "السلام عليكم") {
                 _speech.stop();
@@ -102,12 +117,15 @@ void startListening() {
 
       // Start listening for speech
       listenForSpeech();
-    } else {
+    } 
+    else {
       print("Speech recognition not available");
     }
-  }).catchError((error) {
-    print("Error initializing speech recognition: $error");
-  });
+  }
+  else{
+    print("Failed to initialize speech recognition");
+  
+  }
 }
 
 

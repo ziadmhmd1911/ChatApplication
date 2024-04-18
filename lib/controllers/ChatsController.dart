@@ -75,7 +75,29 @@ class ChatsController {
     return chatList;
 
   }
+
+  Future<List<String>> getUnseenMessagesIds(String chatId) async {
+    List<String> unseenMessagesIds = [];
+    CollectionReference messages = FirebaseFirestore.instance.collection('chatRooms').doc(chatId).collection('messages');
+    QuerySnapshot snapshot = await messages.where('receiverId', isEqualTo: LoggedUser().id).where('seen', isEqualTo: false).get();
+    snapshot.docs.forEach((doc) {
+      unseenMessagesIds.add(doc.id);
+    });
+    return unseenMessagesIds;
+  }
+
+  Future<String> getChatId(String receiverId) async {
+    QuerySnapshot snapshot = await chatRooms
+      .where('participants', arrayContains: [loggedUser.id, receiverId])
+      .get();
+    if(snapshot.docs.isEmpty) {
+      // return the id of the chat
+      return '';
+    }
+    return snapshot.docs[0].id;
+  }
 }
+
 
 // create main function to test the code
 void main() async {
@@ -103,13 +125,7 @@ void main() async {
   await Future.delayed(Duration(seconds: 2));
   await chatsController.createChatWithMessage();*/
   LoggedUser loggedUser = LoggedUser();
-  loggedUser.setAttributes('ehab', 'male', '01093937083','te@ad', '1');
-
-  // Test getChats
-  List<Chats> chatList = await chatsController.searchForChat('m');
-  chatList.forEach((chat) {
-    print(chat.participants);
-    print(chat.lastMessage);
-    print(chat.lastMessageTime);
-  });
+  loggedUser.setAttributes('ehab', 'male', '01093937083','te@ad', 'aidxZmxcZhbcb7gX8gCWluEQVsA2');
+  //test getUnseenMessagesIds
+  
 }

@@ -19,6 +19,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     String formattedTime = DateFormat('h:mm:ss a').format(DateTime.now());
     VoiceAssitantController.setContext(context);
+    VoiceAssitantController voiceAssitantController = VoiceAssitantController();
 
     Future<List<Map<String, String>>> getAllUserData(String currentUser) async {
       final firestore = FirebaseFirestore.instance;
