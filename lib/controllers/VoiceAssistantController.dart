@@ -10,6 +10,7 @@ import 'package:flutter_application_1/models/User.dart';
 import 'package:flutter_application_1/models/loggedUser.dart';
 import 'package:flutter_application_1/screen/conversation_page.dart';
 import 'package:flutter_application_1/screen/home_screen.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:http/http.dart' as http;
 
 
@@ -208,6 +209,33 @@ class VoiceAssitantController {
     }
     return _userController.unblockUser(blockedUser.id!);
   }
+
+  void response(String text, String gender) async {
+    FlutterTts flutterTts = FlutterTts();
+  // flutterTts.speak(text);
+      if (gender == 'male') {
+          await flutterTts.setVoice({"name": "ar-xa-x-ard-local", "locale": "ar"});
+          //Ard -> Male ,, Arz -> Female
+          await flutterTts.setSpeechRate(0.5);
+          // Set the volume to 1.0
+          await flutterTts.setVolume(1.0);
+          // Set the pitch to 1.0
+          await flutterTts.setPitch(1.0);
+          // Speak the message
+          await flutterTts.speak(text);
+    }
+    else {
+          await flutterTts.setVoice({"name": "ar-xa-x-arz-local", "locale": "ar"});
+          //Ard -> Male ,, Arz -> Female
+          await flutterTts.setSpeechRate(0.5);
+          // Set the volume to 1.0
+          await flutterTts.setVolume(1.0);
+          // Set the pitch to 1.0
+          await flutterTts.setPitch(1.0);
+          // Speak the message
+          await flutterTts.speak(text);
+    }
+}
 }
 
 // main function to test the VoiceAssistantController
