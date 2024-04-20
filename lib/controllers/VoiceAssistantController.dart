@@ -12,6 +12,7 @@ import 'package:flutter_application_1/screen/conversation_page.dart';
 import 'package:flutter_application_1/screen/home_screen.dart';
 import 'package:http/http.dart' as http;
 
+
 class VoiceAssitantController {
   ChatsController _chatsController = ChatsController();
   static BuildContext? context;
@@ -75,6 +76,9 @@ class VoiceAssitantController {
       case 'closeChat':
         closeChat();
         break;
+      case 'openedChat':
+        print(openedChat());
+        break;
       case 'sendTextMessageTo':
         sendTextMessageTo(name, data['message']);
         break;
@@ -100,6 +104,7 @@ class VoiceAssitantController {
       if (user.id == '') {
         return 'User not found';
       }
+      LoggedUser().openedChat = user.full_name!;
       Navigator.push(
         context!,
         MaterialPageRoute(
@@ -112,6 +117,7 @@ class VoiceAssitantController {
   }
 
   String closeChat() {
+    LoggedUser().openedChat = '';
     Navigator.push(
       context!,
       MaterialPageRoute(
@@ -120,6 +126,18 @@ class VoiceAssitantController {
     );
     return 'Chat is closed';
   }
+
+  String openedChat(){
+    if(LoggedUser().openedChat=='')
+      {
+        return 'No Chat is Opened';
+      }
+    else
+      {
+        return 'Chat '+LoggedUser().openedChat+' is Opened';
+      }
+  }
+
 
   String sendTextMessageTo(String name, String message) {
     _userController.getUserByName(name).then((user) {

@@ -1,6 +1,7 @@
 // ignore: file_names
 class LoggedUser{
   static final LoggedUser _loggedUser = LoggedUser._internal();
+  String _openedChat='';
   String _fullName = '';
   String _gender = '';
   String _phoneNumber = '';
@@ -12,6 +13,8 @@ class LoggedUser{
   factory LoggedUser(){
     return _loggedUser;
   }
+
+
 
   //call this method to set the attributes of the logged user
   //this method is only be called once
@@ -45,6 +48,13 @@ class LoggedUser{
   String get phoneNumber => _phoneNumber;
   String get email => _email;
   String get id => _id;
+  String get openedChat => _openedChat;
+
+  // setter of openedChat
+
+  set openedChat(String value) {
+    _openedChat = value;
+  }
 
   LoggedUser._internal();
 }
