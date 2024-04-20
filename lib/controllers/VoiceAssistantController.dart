@@ -94,6 +94,12 @@ class VoiceAssitantController {
       case 'endCall':
         endCall();
         break;
+      case 'block':
+        print(await blockUser(name));
+        break;
+      case 'unblock':
+        print(await unblockUser(name));
+        break;
       default:
         print('Command not found');
     }
@@ -185,6 +191,22 @@ class VoiceAssitantController {
   String endCall(){
     // end call
     return 'Call ended';
+  }
+
+  Future<String> blockUser(String name) async {
+    User blockedUser = await _userController.getUserByName(name);
+    if (blockedUser.id == '') {
+      return 'User not found';
+    }
+    return _userController.blockUser(blockedUser.id!);
+  }
+
+  Future<String> unblockUser(String name) async {
+    User blockedUser = await _userController.getUserByName(name);
+    if (blockedUser.id == '') {
+      return 'User not found';
+    }
+    return _userController.unblockUser(blockedUser.id!);
   }
 }
 
