@@ -104,7 +104,7 @@ class _ChatPageState extends State<ChatPage> {
 
   void sendVoice() async {
     if (url
-        .startsWith('https://f...content-available-to-author-only...s.com/')) {
+        .startsWith('https://firebasestorage.googleapis.com/')) {
       await _chatService.SendMessage(widget.receiverUserId, url);
     }
   }
@@ -179,7 +179,7 @@ class _ChatPageState extends State<ChatPage> {
           itemCount: messages.length,
           itemBuilder: (context, index) {
             if (messages[index]['message'].startsWith(
-                'https://f...content-available-to-author-only...s.com/')) {
+                'https://firebasestorage.googleapis.com/')) {
               return VoiceMessageBubble(
                 messageUrl: messages[index]['message'],
                 isSent: messages[index]['senderId'] ==
@@ -394,5 +394,20 @@ Future<void> _onButtonPressed(
 }
 
 void _onToTextButtonPressed(BuildContext context) {
-  // get Mesage
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('مرحبا بلي اخبارك اي'), 
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('Close'),
+          ),
+        ],
+      );
+    },
+  );
 }
