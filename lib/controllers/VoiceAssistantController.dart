@@ -72,19 +72,19 @@ class VoiceAssitantController {
     final name = data['name'];
     switch (command) {
       case 'openChat':
-        print(await openChat(name));
+        response(await openChat(name) , 'male');
         break;
       case 'closeChat':
-        closeChat();
+        response(closeChat(), 'male');
         break;
       case 'openedChat':
-        print(openedChat());
+        response(openedChat(),'male');
         break;
-      case 'sendTextMessageTo':
-        sendTextMessageTo(name, data['message']);
+      case 'textMessage':
+        response(await sendTextMessageTo(name, data['message']),'male');
         break;
-      case 'sendVoiceMessageTo':
-        sendVoiceMessageTo(name, data['message']);
+      case 'voiceMessage':
+        response(sendVoiceMessageTo(name, data['message']),'male');
         break;
       case 'unseenMessages':
         unseenMessages(name);
@@ -96,20 +96,20 @@ class VoiceAssitantController {
         endCall();
         break;
       case 'block':
-        print(await blockUser(name));
+        response(await blockUser(name),'male');
         break;
       case 'unblock':
-        print(await unblockUser(name));
+        response(await unblockUser(name),'male');
         break;
       default:
-        print('Command not found');
+        response('الأمر غير موجود','male');
     }
   }
 
   Future<String> openChat(String name) async {
     User user = await _userController.getUserByName(name);
       if (user.id == '') {
-        return 'User not found';
+        return 'مستخدم غير موجود';
       }
       LoggedUser().openedChat = user.full_name!;
       Navigator.push(
@@ -120,7 +120,7 @@ class VoiceAssitantController {
           receiverUserEmail: user.full_name!,
       )));
       
-    return 'Opened chat with $name';
+    return 'تم فتح الدردشة مع $name';
   }
 
   String closeChat() {
@@ -131,45 +131,45 @@ class VoiceAssitantController {
         builder: (context) => HomePage(userName: _loggedUser.fullName),
       ),
     );
-    return 'Chat is closed';
+    return 'تم إغلاق الدردشة';
   }
 
   String openedChat(){
     if(LoggedUser().openedChat=='')
       {
-        return 'No Chat is Opened';
+        return 'لا يوجد دردشة مفتوحة';
       }
     else
       {
-        return 'Chat '+LoggedUser().openedChat+' is Opened';
+        return 'الدردشة مفتوحة مع ${LoggedUser().openedChat}';
       }
   }
 
 
-  String sendTextMessageTo(String name, String message) {
-    _userController.getUserByName(name).then((user) {
-      if (user.id == '') {
-        return 'User not found';
-      }
+  Future<String> sendTextMessageTo(String name, String message) async {
+    User sender = await _userController.getUserByName(name);
+    if (sender.id == '') {
+      return ('مستخدم غير موجود');
+    }
+      print(message);
       // send message to user with user.id
-    });
-    return 'Message sent to $name';
+    return 'تم إرسال الرسالة إلى $name';
   }
 
   String sendVoiceMessageTo(String name, String message) {
     _userController.getUserByName(name).then((user) {
       if (user.id == '') {
-        return 'User not found';
+        return 'مستخدم غير موجود';
       }
       // send voice message to user with user.id
     });
-    return 'Voice message sent to $name';
+    return 'تم إرسال الرسالة الصوتية إلى $name';
   }
 
   Future<Map<String, dynamic>> unseenMessages(String name) async {
     User sender = await _userController.getUserByName(name);
     if (sender.id == '') {
-      return {'error': 'User not found'};
+      return {'error': 'مستخدم غير موجود'};
     }
     String cahtId = await _chatsController.getChatId(sender.id!);
     return {
@@ -182,22 +182,22 @@ class VoiceAssitantController {
   String call(String name) {
     _userController.getUserByName(name).then((user) {
       if (user.id == '') {
-        return 'User not found';
+        return 'مستخدم غير موجود';
       }
       // call user with user.id
     });
-    return 'Calling $name';
+    return 'جاري الإتصال بـ $name';
   }
 
   String endCall(){
     // end call
-    return 'Call ended';
+    return 'تم إنهاء المكالمة';
   }
 
   Future<String> blockUser(String name) async {
     User blockedUser = await _userController.getUserByName(name);
     if (blockedUser.id == '') {
-      return 'User not found';
+      return 'مستخدم غير موجود';
     }
     return _userController.blockUser(blockedUser.id!);
   }
@@ -205,37 +205,39 @@ class VoiceAssitantController {
   Future<String> unblockUser(String name) async {
     User blockedUser = await _userController.getUserByName(name);
     if (blockedUser.id == '') {
-      return 'User not found';
+      return 'مستخدم غير موجود';
     }
     return _userController.unblockUser(blockedUser.id!);
   }
 
-  void response(String text, String gender) async {
+  void response(String text, String? gender) async {
+    if(gender == null)
+      gender = 'male';
     FlutterTts flutterTts = FlutterTts();
-  // flutterTts.speak(text);
-      if (gender == 'male') {
-          await flutterTts.setVoice({"name": "ar-xa-x-ard-local", "locale": "ar"});
-          //Ard -> Male ,, Arz -> Female
-          await flutterTts.setSpeechRate(0.5);
-          // Set the volume to 1.0
-          await flutterTts.setVolume(1.0);
-          // Set the pitch to 1.0
-          await flutterTts.setPitch(1.0);
-          // Speak the message
-          await flutterTts.speak(text);
+    // flutterTts.speak(text);
+    if (gender == 'male') {
+      await flutterTts.setVoice({"name": "ar-xa-x-ard-local", "locale": "ar"});
+      //Ard -> Male ,, Arz -> Female
+      await flutterTts.setSpeechRate(0.5);
+      // Set the volume to 1.0
+      await flutterTts.setVolume(1.0);
+      // Set the pitch to 1.0
+      await flutterTts.setPitch(1.0);
+      // Speak the message
+      await flutterTts.speak(text);
     }
     else {
-          await flutterTts.setVoice({"name": "ar-xa-x-arz-local", "locale": "ar"});
-          //Ard -> Male ,, Arz -> Female
-          await flutterTts.setSpeechRate(0.5);
-          // Set the volume to 1.0
-          await flutterTts.setVolume(1.0);
-          // Set the pitch to 1.0
-          await flutterTts.setPitch(1.0);
-          // Speak the message
-          await flutterTts.speak(text);
+      await flutterTts.setVoice({"name": "ar-xa-x-arz-local", "locale": "ar"});
+      //Ard -> Male ,, Arz -> Female
+      await flutterTts.setSpeechRate(0.5);
+      // Set the volume to 1.0
+      await flutterTts.setVolume(1.0);
+      // Set the pitch to 1.0
+      await flutterTts.setPitch(1.0);
+      // Speak the message
+      await flutterTts.speak(text);
     }
-}
+  }
 }
 
 // main function to test the VoiceAssistantController

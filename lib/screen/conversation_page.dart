@@ -13,22 +13,21 @@ import 'package:path/path.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 // import from controllers UserControllers
 import 'package:flutter_application_1/controllers/UserController.dart';
- 
- 
+
 class ChatPage extends StatefulWidget {
   final String receiverUserId;
   final String receiverUserEmail;
- 
+
   const ChatPage({
     Key? key,
     required this.receiverUserId,
     required this.receiverUserEmail,
   }) : super(key: key);
- 
+
   @override
   _ChatPageState createState() => _ChatPageState();
 }
- 
+
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _messageController = TextEditingController();
   final ChatService _chatService = ChatService();
@@ -45,7 +44,7 @@ class _ChatPageState extends State<ChatPage> {
   String ReceiverUserGender = '';
   String ReceiverUserPhone = '';
   UserController _userController = UserController();
- 
+
   @override
   void initState() {
     super.initState();
@@ -53,7 +52,7 @@ class _ChatPageState extends State<ChatPage> {
     ReceiverUserName = widget.receiverUserEmail;
     getReceiverData();
   }
- 
+
   startRecord() async {
     final location = await getApplicationDocumentsDirectory();
     String name = Uuid().v1();
@@ -63,54 +62,57 @@ class _ChatPageState extends State<ChatPage> {
       });
       await record.start(RecordConfig(), path: '${location.path}/$name.m4a');
     }
-    print("Recording Started");
+    print("بدايه التسجيل");
   }
- 
+
   stopRecord() async {
     String? finalPath = await record.stop();
     setState(() {
       path = finalPath!;
       isRecording = false;
     });
-    print("Recording Stopped");
+    print("توقف التسجيل");
     upload(); // Await upload function call
   }
- 
+
   upload() async {
     String name = basename(path);
-    final ref = FirebaseStorage.instance.ref('Voice'+name);
+    final ref = FirebaseStorage.instance.ref('Voice' + name);
     await ref.putFile(File(path!));
     String downloadUrl = await ref.getDownloadURL();
     setState(() {
       url = downloadUrl;
     });
-    print("Uploaded");
+    print("تم التحميل");
   }
- 
+
   play(url) async {
     await newAudioPlayer.play(url);
     setState(() {
       isPlaying = true;
     });
-    print("Audio Playing!!");
+    print("تشغيل الصوت");
   }
- 
+
   void sendMessage() async {
     if (_messageController.text.isNotEmpty) {
-      await _chatService.SendMessage(widget.receiverUserId, _messageController.text);
+      await _chatService.SendMessage(
+          widget.receiverUserId, _messageController.text);
       _messageController.clear();
     }
   }
- 
+
   void sendVoice() async {
-    if (url.startsWith('https://f...content-available-to-author-only...s.com/')) {
+    if (url
+        .startsWith('https://f...content-available-to-author-only...s.com/')) {
       await _chatService.SendMessage(widget.receiverUserId, url);
     }
   }
- 
+
   //Function to get all recviver data using the userController
   void getReceiverData() async {
-    final userData = await _userController.getUserByName(widget.receiverUserEmail);
+    final userData =
+        await _userController.getUserByName(widget.receiverUserEmail);
     //Print the data to the console
     setState(() {
       ReceiverUserId = userData.id!;
@@ -118,9 +120,7 @@ class _ChatPageState extends State<ChatPage> {
       ReceiverUserGender = userData.gender!;
     });
   }
- 
- 
- 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -143,50 +143,54 @@ class _ChatPageState extends State<ChatPage> {
           Image.asset(
             'images/bk.png',
             fit: BoxFit.cover,
-            width: double.infinity, 
+            width: double.infinity,
             height: double.infinity,
           ),
-      Column(
-        children: [
-          Expanded(
-            child: _buildMessageList(),
-          ),
-          _buildMessageInput(),
+          Column(
+            children: [
+              Expanded(
+                child: _buildMessageList(),
+              ),
+              _buildMessageInput(),
             ],
           ),
         ],
       ),
     );
   }
- 
+
   Widget _buildMessageList() {
     return StreamBuilder(
-      stream: _chatService.getMessages(widget.receiverUserId, _firebaseAuth.currentUser!.uid),
+      stream: _chatService.getMessages(
+          widget.receiverUserId, _firebaseAuth.currentUser!.uid),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Text('Error${snapshot.error}');
         }
- 
+
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
- 
+
         List<DocumentSnapshot> messages = snapshot.data!.docs.reversed.toList();
- 
+
         return ListView.builder(
           reverse: false, // Display the list in reverse order
           itemCount: messages.length,
           itemBuilder: (context, index) {
-            if (messages[index]['message'].startsWith('https://f...content-available-to-author-only...s.com/')) {
+            if (messages[index]['message'].startsWith(
+                'https://f...content-available-to-author-only...s.com/')) {
               return VoiceMessageBubble(
                 messageUrl: messages[index]['message'],
-                isSent: messages[index]['senderId'] == _firebaseAuth.currentUser!.uid,
+                isSent: messages[index]['senderId'] ==
+                    _firebaseAuth.currentUser!.uid,
                 time: _formatTimestamp(messages[index]['timestamp']),
               );
             } else {
               return TextMessageBubble(
                 message: messages[index]['message'],
-                isSent: messages[index]['senderId'] == _firebaseAuth.currentUser!.uid,
+                isSent: messages[index]['senderId'] ==
+                    _firebaseAuth.currentUser!.uid,
                 time: _formatTimestamp(messages[index]['timestamp']),
                 gender: ReceiverUserGender,
               );
@@ -196,13 +200,14 @@ class _ChatPageState extends State<ChatPage> {
       },
     );
   }
- 
+
   String _formatTimestamp(Timestamp timestamp) {
     DateTime dateTime = timestamp.toDate();
-    String formattedTime = '${dateTime.hour}:${dateTime.minute}:${dateTime.second}'; // Format hours, minutes, and seconds
+    String formattedTime =
+        '${dateTime.hour}:${dateTime.minute}:${dateTime.second}'; // Format hours, minutes, and seconds
     return formattedTime;
   }
- 
+
   Widget _buildMessageInput() {
     return Container(
       padding: const EdgeInsets.all(8),
@@ -213,9 +218,10 @@ class _ChatPageState extends State<ChatPage> {
             child: TextField(
               controller: _messageController,
               decoration: const InputDecoration(
-                hintText: 'Enter your message',
+                hintText: 'اكتب الرساله',
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
             ),
           ),
@@ -239,19 +245,19 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 }
- 
+
 class VoiceMessageBubble extends StatelessWidget {
   final String messageUrl;
   final bool isSent;
   final String time;
- 
+
   const VoiceMessageBubble({
     Key? key,
     required this.messageUrl,
     required this.isSent,
     required this.time,
   }) : super(key: key);
- 
+
   @override
   Widget build(BuildContext context) {
     return Align(
@@ -260,7 +266,7 @@ class VoiceMessageBubble extends StatelessWidget {
         margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
         padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
         decoration: BoxDecoration(
-          color: isSent ?  Color(0xFF8E4DB2) : Colors.white,
+          color: isSent ? Color(0xFF8E4DB2) : Colors.white,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
@@ -285,14 +291,16 @@ class VoiceMessageBubble extends StatelessWidget {
             SizedBox(height: 5),
             Text(
               time,
-            style: TextStyle(fontSize: 12, color: isSent ? Colors.white : Colors.black),
+              style: TextStyle(
+                  fontSize: 12, color: isSent ? Colors.white : Colors.black),
             ),
             SizedBox(height: 5),
             TextButton(
               onPressed: () {
                 // Function to be executed when the button is pressed
                 _onToTextButtonPressed(context);
-              }, child: Text('change to text'),
+              },
+              child: Text('تحويل الي رساله نصيه'),
             )
           ],
         ),
@@ -300,13 +308,13 @@ class VoiceMessageBubble extends StatelessWidget {
     );
   }
 }
- 
+
 class TextMessageBubble extends StatelessWidget {
   final String message;
   final bool isSent;
   final String time;
   final String gender;
- 
+
   const TextMessageBubble({
     Key? key,
     required this.message,
@@ -314,7 +322,7 @@ class TextMessageBubble extends StatelessWidget {
     required this.time,
     required this.gender,
   }) : super(key: key);
- 
+
   @override
   Widget build(BuildContext context) {
     return Align(
@@ -336,14 +344,16 @@ class TextMessageBubble extends StatelessWidget {
             SizedBox(height: 5),
             Text(
               time,
-              style: TextStyle(fontSize: 12, color: isSent ? Colors.white : Colors.black),
+              style: TextStyle(
+                  fontSize: 12, color: isSent ? Colors.white : Colors.black),
             ),
             SizedBox(height: 5),
             TextButton(
               onPressed: () {
                 // Function to be executed when the button is pressed
                 _onButtonPressed(context, message, gender);
-              }, child: Text('change to voice'),
+              },
+              child: Text('تحويل لرساله صوتيه'),
             )
           ],
         ),
@@ -352,38 +362,37 @@ class TextMessageBubble extends StatelessWidget {
   }
 }
 
-Future<void> _onButtonPressed(BuildContext context, String message, String gender) async {
+Future<void> _onButtonPressed(
+    BuildContext context, String message, String gender) async {
   // get Mesage
   FlutterTts flutterTts = FlutterTts();
   // Set the language to Arabic (Egypt)
   await flutterTts.setLanguage('ar');
-  print ("Gender: " + gender);
-  if (gender == 'male') {
-        await flutterTts.setVoice({"name": "ar-xa-x-ard-local", "locale": "ar"});
-        //Ard -> Male ,, Arz -> Female
-        await flutterTts.setSpeechRate(0.5);
-        // Set the volume to 1.0
-        await flutterTts.setVolume(1.0);
-        // Set the pitch to 1.0
-        await flutterTts.setPitch(1.0);
-        // Speak the message
-        await flutterTts.speak(message);
-  }
-  else {
-        await flutterTts.setVoice({"name": "ar-xa-x-arz-local", "locale": "ar"});
-        //Ard -> Male ,, Arz -> Female
-        await flutterTts.setSpeechRate(0.5);
-        // Set the volume to 1.0
-        await flutterTts.setVolume(1.0);
-        // Set the pitch to 1.0
-        await flutterTts.setPitch(1.0);
-        // Speak the message
-        await flutterTts.speak(message);
+  print("الهويه: " + gender);
+  if (gender == 'ذكر') {
+    await flutterTts.setVoice({"name": "ar-xa-x-ard-local", "locale": "ar"});
+    //Ard -> Male ,, Arz -> Female
+    await flutterTts.setSpeechRate(0.5);
+    // Set the volume to 1.0
+    await flutterTts.setVolume(1.0);
+    // Set the pitch to 1.0
+    await flutterTts.setPitch(1.0);
+    // Speak the message
+    await flutterTts.speak(message);
+  } else {
+    await flutterTts.setVoice({"name": "ar-xa-x-arz-local", "locale": "ar"});
+    //Ard -> Male ,, Arz -> Female
+    await flutterTts.setSpeechRate(0.5);
+    // Set the volume to 1.0
+    await flutterTts.setVolume(1.0);
+    // Set the pitch to 1.0
+    await flutterTts.setPitch(1.0);
+    // Speak the message
+    await flutterTts.speak(message);
   }
   // You can add any other functionality you want here
 }
 
 void _onToTextButtonPressed(BuildContext context) {
   // get Mesage
-  
 }

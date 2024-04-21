@@ -32,7 +32,7 @@ class WelcomeScreen extends StatelessWidget {
                     text: const TextSpan(
                       children: [
                         TextSpan(
-                            text: 'Welcome Back!\n',
+                            text: 'اهلا مجددا\n',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 45.0,
@@ -40,7 +40,7 @@ class WelcomeScreen extends StatelessWidget {
                             )),
                         TextSpan(
                             text:
-                                '\nChat with your friends and family\nusing our messaging app.',
+                                '\nتحدث مع أصدقائك وعائلتك\nباستخدام تطبيق المراسلة لدينا.',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 20,
@@ -50,7 +50,7 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-        )),
+              )),
           Flexible(
             flex: 1,
             child: Align(
@@ -58,27 +58,25 @@ class WelcomeScreen extends StatelessWidget {
               child: Row(
                 children: [
                   const Expanded(
-                    child:WelcomeButton(
-                      buttonText: 'Sign in' ,
-                      onTap: SignInScreen(),
-                      color: Colors.transparent,
-                      textColor: Colors.white,
-                    )
-                    ),
+                      child: WelcomeButton(
+                    buttonText: 'تسجيل الدخول',
+                    onTap: SignInScreen(),
+                    color: Colors.transparent,
+                    textColor: Colors.white,
+                  )),
                   Expanded(
-                    child:WelcomeButton(
-                      buttonText: 'Sign up',
-                      onTap: const SignUpScreen(),
-                      color: Colors.white,   
-                      textColor: lightColorScheme.primary,        
-                    )
-                   ),
+                      child: WelcomeButton(
+                    buttonText: 'التسجيل',
+                    onTap: const SignUpScreen(),
+                    color: Colors.white,
+                    textColor: lightColorScheme.primary,
+                  )),
                 ],
               ),
             ),
           ),
         ],
       ),
-    );  
+    );
   }
 }

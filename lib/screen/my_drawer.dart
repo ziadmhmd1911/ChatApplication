@@ -11,57 +11,85 @@ class MyDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final String userName = "Ahmed";
     return Drawer(
-      backgroundColor: Theme.of(context).colorScheme.secondary,
-      child: Column(
-        children: [
+        backgroundColor: Theme.of(context).colorScheme.secondary,
+        child: Column(children: [
           DrawerHeader(
             child: Center(
-              child:Icon(
-                Icons.message,color: Theme.of(context).colorScheme.background,
+              child: Icon(
+                Icons.message,
+                color: Theme.of(context).colorScheme.background,
                 size: 40,
               ),
-            ),       
+            ),
           ),
           const SizedBox(
             height: 25.0,
           ),
           Padding(
-            padding:const EdgeInsets.only(left: 25.0),
+            padding: const EdgeInsets.only(left: 25.0),
             child: ListTile(
-              title: Text('Home',style: TextStyle(color: Theme.of(context).colorScheme.background),),
-              leading: Icon(Icons.home,color: Theme.of(context).colorScheme.background,),
-              onTap: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context)=> HomePage(userName: userName)));
+              title: Text(
+                'الصفحه الرئيسيه',
+                style:
+                    TextStyle(color: Theme.of(context).colorScheme.background),
+              ),
+              leading: Icon(
+                Icons.home,
+                color: Theme.of(context).colorScheme.background,
+              ),
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => HomePage(userName: userName)));
               },
             ),
           ),
           const SizedBox(
             height: 25.0,
-          ), 
+          ),
           Padding(
-            padding:const EdgeInsets.only(left: 25.0),
+            padding: const EdgeInsets.only(left: 25.0),
             child: ListTile(
-              title: Text('Settings',style: TextStyle(color: Theme.of(context).colorScheme.background),),
-              leading: Icon(Icons.settings,color: Theme.of(context).colorScheme.background,),
-              onTap: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>SettingsScreen()));},
+              title: Text(
+                'الاعدادات',
+                style:
+                    TextStyle(color: Theme.of(context).colorScheme.background),
+              ),
+              leading: Icon(
+                Icons.settings,
+                color: Theme.of(context).colorScheme.background,
+              ),
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => SettingsScreen()));
+              },
             ),
           ),
           const SizedBox(
             height: 25.0,
           ),
           Padding(
-            padding:const EdgeInsets.only(left: 25.0),
+            padding: const EdgeInsets.only(left: 25.0),
             child: ListTile(
-              title: Text('Log Out',style: TextStyle(color: Theme.of(context).colorScheme.background),),
-              leading: Icon(Icons.logout,color: Theme.of(context).colorScheme.background,),
-              onTap: (){
+              title: Text(
+                'تسجيل الخروج',
+                style:
+                    TextStyle(color: Theme.of(context).colorScheme.background),
+              ),
+              leading: Icon(
+                Icons.logout,
+                color: Theme.of(context).colorScheme.background,
+              ),
+              onTap: () {
                 LoggedUser().logOut();
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>const SignInScreen()));},
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const SignInScreen()));
+              },
             ),
           ),
-        ]
-      )
-    );
+        ]));
   }
 }

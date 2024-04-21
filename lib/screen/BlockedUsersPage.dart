@@ -8,9 +8,9 @@ class BlockedUsersPage extends StatefulWidget {
 
 class _BlockedUsersPageState extends State<BlockedUsersPage> {
   final List<String> _blockedUsers = [
-    'Blocked User 1',
-    'Blocked User 2',
-    'Blocked User 3',
+    'مستخدم محظور 1',
+    'مستخدم محظور 2',
+    'مستخدم محظور 3',
   ]; // Example list of blocked users
 
   @override
@@ -19,9 +19,11 @@ class _BlockedUsersPageState extends State<BlockedUsersPage> {
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         title: Text(
-          'Settings',
+          'الاعدادات',
           style: TextStyle(
-              color: Theme.of(context).colorScheme.background), // Changed color to white
+              color: Theme.of(context)
+                  .colorScheme
+                  .background), // Changed color to white
         ),
         centerTitle: true,
         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -31,7 +33,7 @@ class _BlockedUsersPageState extends State<BlockedUsersPage> {
         child: _blockedUsers.isEmpty
             ? const Center(
                 child: Text(
-                  'No users blocked',
+                  'لا يوجد اشخاص محظورين',
                   style: TextStyle(fontSize: 18.0),
                 ),
               )
@@ -66,7 +68,8 @@ class _BlockedUsersPageState extends State<BlockedUsersPage> {
 
   void _unblockUser(int index) {
     setState(() {
-      _blockedUsers.removeAt(index); // Remove user from the list of blocked users
+      _blockedUsers
+          .removeAt(index); // Remove user from the list of blocked users
     });
     // Implement logic to unblock the user (e.g., send request to server)
   }

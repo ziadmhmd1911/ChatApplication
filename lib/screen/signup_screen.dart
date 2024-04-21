@@ -39,28 +39,33 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return hashedPassword.toString();
   }
 
-    Future<void> addUser() async {
-      String hashedPassword = hashPassword(password.text); // Assuming hashPassword function is defined elsewhere
-      try {
-        UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: email.text,
-          password: hashedPassword,
-        );
-        // After successful user creation, you can save additional user information to Firestore or other databases if needed.
-        // For example, if you're using Cloud Firestore:
-        await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).set({
-          'email': email.text,
-          'full_name': fullName.text, // John Doe
-          'phone': phone.text,
-          'gender': gender,
-          //Add Id
-          'Id': userCredential.user?.uid,
-        });
-        print("User Added");
-      } catch (error) {
-        print("Failed to add user: $error");
-      }
+  Future<void> addUser() async {
+    String hashedPassword = hashPassword(
+        password.text); // Assuming hashPassword function is defined elsewhere
+    try {
+      UserCredential userCredential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email.text,
+        password: hashedPassword,
+      );
+      // After successful user creation, you can save additional user information to Firestore or other databases if needed.
+      // For example, if you're using Cloud Firestore:
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredential.user?.uid)
+          .set({
+        'email': email.text,
+        'full_name': fullName.text, // John Doe
+        'phone': phone.text,
+        'gender': gender,
+        //Add Id
+        'Id': userCredential.user?.uid,
+      });
+      print("User Added");
+    } catch (error) {
+      print("Failed to add user: $error");
     }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +98,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     children: [
                       // get started text
                       Text(
-                        'Get Started',
+                        'البدء',
                         style: TextStyle(
                           fontSize: 30.0,
                           fontWeight: FontWeight.w900,
@@ -108,13 +113,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         controller: fullName,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter Full name';
+                            return 'الرجاء إدخال الاسم الكامل';
                           }
                           return null;
                         },
                         decoration: InputDecoration(
-                          label: const Text('Username'),
-                          hintText: 'Enter your Username',
+                          label: const Text('اسم المستخدم'),
+                          hintText: 'ادخل اسم المستخدم',
                           hintStyle: const TextStyle(
                             color: Colors.black26,
                           ),
@@ -140,20 +145,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         controller: phone,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter your phone number';
+                            return 'يرجى إدخال رقم الهاتف الخاص بك';
                           }
 
                           // Check if the entered value is a valid 11-digit number
                           if (!RegExp(r'^[0-9]{11}$').hasMatch(value)) {
-                            return 'Please enter a valid 11-digit phone number';
+                            return 'الرجاء إدخال رقم هاتف صالح مكون من 11 رقمًا';
                           }
 
                           return null;
                         },
-                        keyboardType: TextInputType.phone, // This will show the numeric keyboard
+                        keyboardType: TextInputType
+                            .phone, // This will show the numeric keyboard
                         decoration: InputDecoration(
-                          label: const Text('Phone Number'),
-                          hintText: 'Enter your phone number',
+                          label: const Text('رقم الهاتف'),
+                          hintText: 'أدخل رقم هاتفك',
                           hintStyle: const TextStyle(
                             color: Colors.black26,
                           ),
@@ -179,20 +185,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         controller: email,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter your email';
+                            return 'رجاءا أدخل بريدك الإلكتروني';
                           }
 
                           // Check if the entered value is a valid email address
-                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                            return 'Please enter a valid email address';
+                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                              .hasMatch(value)) {
+                            return 'يرجى إدخال عنوان بريد إلكتروني صالح';
                           }
 
                           return null;
                         },
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
-                          label: const Text('Email'),
-                          hintText: 'Enter your email',
+                          label: const Text('بريد إلكتروني'),
+                          hintText: 'أدخل بريدك الإلكتروني',
                           hintStyle: const TextStyle(
                             color: Colors.black26,
                           ),
@@ -220,13 +227,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         obscuringCharacter: '*',
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter Password';
+                            return 'الرجاء إدخال كلمة المرور';
                           }
                           return null;
                         },
                         decoration: InputDecoration(
-                          label: const Text('Password'),
-                          hintText: 'Enter Password',
+                          label: const Text(' كلمة المرور'),
+                          hintText: ' إدخل كلمة المرور',
                           hintStyle: const TextStyle(
                             color: Colors.black26,
                           ),
@@ -249,7 +256,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                       // gender selection
                       const Text(
-                        'Select Gender',
+                        'اختار الهويه',
                         style: TextStyle(
                           fontSize: 18.0,
                           fontWeight: FontWeight.bold,
@@ -263,7 +270,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Radio(
-                            value: 'male',
+                            value: 'ذكر',
                             groupValue: gender,
                             onChanged: (value) {
                               setState(() {
@@ -271,9 +278,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               });
                             },
                           ),
-                          const Text('Male'),
+                          const Text('ذكر'),
                           Radio(
-                            value: 'female',
+                            value: 'انثي',
                             groupValue: gender,
                             onChanged: (value) {
                               setState(() {
@@ -281,7 +288,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               });
                             },
                           ),
-                          const Text('Female'),
+                          const Text('انثي'),
                         ],
                       ),
                       // i agree to the processing
@@ -297,13 +304,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             activeColor: lightColorScheme.primary,
                           ),
                           const Text(
-                            'I agree to the processing of ',
+                            'أوافق على معالجة ',
                             style: TextStyle(
                               color: Colors.black45,
                             ),
                           ),
                           Text(
-                            'Personal data',
+                            'بيانات شخصيه',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: lightColorScheme.primary,
@@ -324,18 +331,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 agreePersonalData) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Processing Data'),
+                                  content: Text('جاري معالجة البيانات'),
                                 ),
                               );
                             } else if (!agreePersonalData) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                     content: Text(
-                                        'Please agree to the processing of personal data')),
+                                        'يرجى الموافقة على معالجة البيانات الشخصية')),
                               );
                             }
                           },
-                          child: const Text('Sign up'),
+                          child: const Text('تسجيل'),
                         ),
                       ),
                       const SizedBox(
@@ -383,7 +390,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           //Logo(Logos.google),
                           //Logo(Logos.apple),
                         ],
-                      ),*/  
+                      ),*/
                       const SizedBox(
                         height: 25.0,
                       ),
@@ -392,11 +399,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Text(
-                            'Already have an account? ',
+                            'هل لديك حساب بالفعل؟ ',
                             style: TextStyle(
                               color: Colors.black45,
                             ),
-                          ), 
+                          ),
                           GestureDetector(
                             onTap: () {
                               Navigator.push(
@@ -407,7 +414,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               );
                             },
                             child: Text(
-                              'Sign in',
+                              'تسجيل الدخول',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: lightColorScheme.primary,

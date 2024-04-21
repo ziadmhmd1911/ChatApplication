@@ -6,6 +6,7 @@ import 'package:flutter_application_1/screen/my_drawer.dart';
 import 'package:flutter_application_1/screen/signin_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 
 class HomePage extends StatelessWidget {
   final String userName;
@@ -237,10 +238,59 @@ class HomePage extends StatelessWidget {
             Icons.edit_outlined,
             size: 25,
           ),
-          onPressed: () {},
+          onPressed: () {
+            startListening();
+          },
         ),
       ),
       drawer: MyDrawer(),
     );
   }
 }
+
+void startListening() async {
+    SpeechToText _speech = SpeechToText();
+    bool speechSuccess = await _speech.initialize();
+    if (speechSuccess) {
+      if (_speech.isAvailable) {
+        // Define a function to handle speech recognition
+        bool noAssist = true;
+        void listenForSpeech() async {
+          _speech.listen(
+            localeId: 'ar', // Specify Arabic locale
+            onResult: (result) async {
+              if (result.finalResult) {
+                print("You said: ${result.recognizedWords}");
+                if (result.recognizedWords == "مرحبا مساعدي" && noAssist) {
+                  noAssist = false;
+                } else if (!noAssist) {
+                  noAssist = true;
+                  VoiceAssitantController voiceAssistant =
+                      VoiceAssitantController();
+                  Map<String, dynamic> response = await voiceAssistant
+                      .getCommandAndName(result.recognizedWords);
+                  print(response);
+                  voiceAssistant.excuteCommand(response);
+                }
+                // Handle the recognized speech here
+                if (result.recognizedWords == "السلام عليكم") {
+                  _speech.stop();
+                  print("Speech recognition stopped.");
+                } else {
+                  // If the phrase is not recognized, continue listening
+                  listenForSpeech();
+                }
+              }
+            },
+          );
+        }
+
+        // Start listening for speech
+        listenForSpeech();
+      } else {
+        print("Speech recognition not available");
+      }
+    } else {
+      print("Failed to initialize speech recognition");
+    }
+  }

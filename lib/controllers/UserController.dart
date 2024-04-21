@@ -53,7 +53,7 @@ class UserController {
     // check if the user is already blocked
     final blockedUsers = await currentUserDoc.get().then((doc) => doc['blockedUsers']);
     if(blockedUsers.contains(blockedUserId)) {
-      return 'User already blocked';
+      return 'المستخدم محظور بالفعل';
     }
 
     await currentUserDoc.update({
@@ -64,7 +64,7 @@ class UserController {
       'blockedBy': FieldValue.arrayUnion([loggedUser.id]),
     });
 
-    return 'User blocked successfully';
+    return 'تم حظر المستخدم بنجاح';
   }
   
   Future<String> unblockUser(String blockedUserId) async {
@@ -77,7 +77,7 @@ class UserController {
     // check if the user is already blocked
     final blockedUsers = await currentUserDoc.get().then((doc) => doc['blockedUsers']);
     if(!blockedUsers.contains(blockedUserId)) {
-      return 'User is not blocked';
+      return 'مستخدم بالفعل غير محظور';
     }
 
     await currentUserDoc.update({
@@ -88,6 +88,6 @@ class UserController {
       'blockedBy': FieldValue.arrayRemove([loggedUser.id]),
     });
 
-    return 'User unblocked successfully';
+    return 'تم إلغاء حظر المستخدم بنجاح';
   }
 }
