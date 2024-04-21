@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_application_1/chat/chat_service.dart';
 import 'package:flutter_application_1/controllers/ChatsController.dart';
 import 'package:flutter_application_1/controllers/UserController.dart';
 import 'package:flutter_application_1/firebase_options.dart';
@@ -21,6 +22,7 @@ class VoiceAssitantController {
   LoggedUser _loggedUser = LoggedUser();
   static String _api = 'http://10.0.2.2:5000';
   HttpClient _httpClient = HttpClient();
+  ChatService _chatService = ChatService();
 
   Future<Map<String, dynamic>> getCommandAndName(String text) async {
     final url = Uri.parse('$_api/get-command-and-name');
@@ -147,11 +149,12 @@ class VoiceAssitantController {
 
 
   Future<String> sendTextMessageTo(String name, String message) async {
-    User sender = await _userController.getUserByName(name);
-    if (sender.id == '') {
+    User receiver = await _userController.getUserByName(name);
+    if (receiver.id == '') {
       return ('مستخدم غير موجود');
     }
       print(message);
+      _chatService.SendMessage(receiver.id!, message);
       // send message to user with user.id
     return 'تم إرسال الرسالة إلى $name';
   }
