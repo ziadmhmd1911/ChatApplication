@@ -249,48 +249,60 @@ class HomePage extends StatelessWidget {
 }
 
 void startListening() async {
-    SpeechToText _speech = SpeechToText();
-    bool speechSuccess = await _speech.initialize();
-    if (speechSuccess) {
-      if (_speech.isAvailable) {
-        // Define a function to handle speech recognition
-        bool noAssist = true;
-        void listenForSpeech() async {
-          _speech.listen(
-            localeId: 'ar', // Specify Arabic locale
-            onResult: (result) async {
-              if (result.finalResult) {
-                print("You said: ${result.recognizedWords}");
-                if (result.recognizedWords == "مرحبا مساعدي" && noAssist) {
-                  noAssist = false;
-                } else if (!noAssist) {
-                  noAssist = true;
-                  VoiceAssitantController voiceAssistant =
-                      VoiceAssitantController();
-                  Map<String, dynamic> response = await voiceAssistant
-                      .getCommandAndName(result.recognizedWords);
+  SpeechToText _speech = SpeechToText();
+  VoiceAssitantController voiceAssistant = VoiceAssitantController();
+  bool speechSuccess = await _speech.initialize();
+  if (speechSuccess) {
+    if (_speech.isAvailable) {
+      // Define a function to handle speech recognition
+      int noAssist = 0;
+      Map<String, dynamic> newResponse = {};
+      void listenForSpeech() async {
+        _speech.listen(
+          localeId: 'ar', // Specify Arabic locale
+          onResult: (result) async {
+            if (result.finalResult) {
+              print("You said: ${result.recognizedWords}");
+              if (result.recognizedWords == "مرحبا مساعدي" && noAssist == 0) {
+                noAssist = 1;
+              } else if (noAssist == 1) {
+                if(noAssist == 1){
+                  Map<String, dynamic> response = await voiceAssistant.getCommandAndName(result.recognizedWords);
                   print(response);
-                  voiceAssistant.excuteCommand(response);
+                  if(response['command'] == 'textMessage'){
+                    noAssist = 2;
+                    voiceAssistant.response('سجل رسالتك', 'male');
+                    newResponse = response;
+                  }else{
+                    voiceAssistant.excuteCommand(response);
+                    noAssist = 0;
+                  }
                 }
-                // Handle the recognized speech here
-                if (result.recognizedWords == "السلام عليكم") {
-                  _speech.stop();
-                  print("Speech recognition stopped.");
-                } else {
-                  // If the phrase is not recognized, continue listening
-                  listenForSpeech();
-                }
+              }else if(noAssist == 2){
+                print("Recording voice message");
+                newResponse['message'] = result.recognizedWords;
+                voiceAssistant.excuteCommand(newResponse);
+                noAssist = 0;
               }
-            },
-          );
-        }
-
-        // Start listening for speech
-        listenForSpeech();
-      } else {
-        print("Speech recognition not available");
+              // Handle the recognized speech here
+              if (result.recognizedWords == "السلام عليكم") {
+                _speech.stop();
+                print("Speech recognition stopped.");
+              } else {
+                // If the phrase is not recognized, continue listening
+                listenForSpeech();
+              }
+            }
+          },
+        );
       }
+
+      // Start listening for speech
+      listenForSpeech();
     } else {
-      print("Failed to initialize speech recognition");
+      print("Speech recognition not available");
     }
+  } else {
+    print("Failed to initialize speech recognition");
   }
+}
