@@ -103,7 +103,7 @@ void main() async {
   await Future.delayed(Duration(seconds: 2));
   await chatsController.createChatWithMessage();*/
   LoggedUser loggedUser = LoggedUser();
-  loggedUser.setAttributes('ehab', 'male', '01093937083','te@ad', '1');
+  //loggedUser.setAttributes('ehab', 'male', '01093937083','te@ad', '1');
 
   // Test getChats
   List<Chats> chatList = await chatsController.searchForChat('m');
