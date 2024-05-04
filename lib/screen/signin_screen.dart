@@ -64,13 +64,18 @@ class _SignState extends State<SignInScreen> {
       final user = FirebaseAuth.instance.currentUser;
       final userDocument = await users.doc(user!.uid).get();
       currentUserName = userDocument['full_name'];
+      List<String> blockedUsers = [];
+      userDocument['blockedUsers'].forEach((e)=>{
+        blockedUsers.add(e.toString())
+      });
       LoggedUser loggedUser = LoggedUser();
       loggedUser.setAttributes(
           userDocument['full_name'],
           userDocument['gender'],
           userDocument['phone'],
           userDocument['email'],
-          userDocument['Id']);
+          userDocument['Id'], 
+          blockedUsers);
 
       // If login is successful, print a success message
       print("تم تسجيل الدخول بنجاح");

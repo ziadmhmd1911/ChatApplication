@@ -7,6 +7,7 @@ class LoggedUser{
   String _phoneNumber = '';
   String _email = '';
   String _id = '';
+  List<String> _blockedUsersIds = [];
   bool _isLogged = false;
 
 
@@ -18,7 +19,7 @@ class LoggedUser{
 
   //call this method to set the attributes of the logged user
   //this method is only be called once
-  void setAttributes(String fullName, String gender, String phoneNumber, String email, String id){
+  void setAttributes(String fullName, String gender, String phoneNumber, String email, String id, List<String> blockedUsersIds){
     if(_isLogged) {
       print('LoggedUser attributes are already set');
       return;
@@ -30,6 +31,7 @@ class LoggedUser{
     _phoneNumber = phoneNumber;
     _email = email;
     _id = id;
+    _blockedUsersIds = blockedUsersIds;
     print('LoggedUser attributes are set');
   }
 
@@ -40,6 +42,7 @@ class LoggedUser{
     _gender = '';
     _phoneNumber = '';
     _id = '';
+    _blockedUsersIds = [];
   }
 
   // add getters for the attributes
@@ -49,6 +52,7 @@ class LoggedUser{
   String get email => _email;
   String get id => _id;
   String get openedChat => _openedChat;
+  List<String> get blockedUsersIds => _blockedUsersIds;
 
   // setter of openedChat
 

@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/controllers/SpeechToTextController.dart';
+import 'package:flutter_application_1/controllers/UserController.dart';
 import 'package:flutter_application_1/controllers/VoiceAssistantController.dart';
 import 'package:flutter_application_1/screen/conversation_page.dart'; // Import the ConversationPage widget
 import 'package:flutter_application_1/screen/my_drawer.dart';
@@ -15,6 +16,7 @@ class HomePage extends StatelessWidget {
   HomePage({Key? key, required this.userName}) : super(key: key);
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final UserController userController = new UserController();
   // get Current UserId
   final String currentUserId = FirebaseAuth.instance.currentUser!.uid;
   @override
@@ -55,6 +57,7 @@ class HomePage extends StatelessWidget {
           if (chatRoomId.split('_')[0] == currentUserId) {
             print("Condition One");
             print(currentUserId);
+            
             chatRoomiidd = chatRoomId.split('_')[1];
             print(chatRoomiidd);
           } else {
@@ -71,11 +74,14 @@ class HomePage extends StatelessWidget {
           });
           // Add chatRoomId and usernames to chatRoomsData list
           //Sender_Receiver(chatrromid)
-          chatRoomsData.add({
-            'UserId': chatRoomiidd,
-            'userNames': UserNames.join(', '), // Convert List<String> to comma-separated string
-            'LastMessage': doc['lastMessage'] as String,
-          });
+          if(!userController.isUserBlocked(chatRoomiidd))
+          {
+            chatRoomsData.add({
+              'UserId': chatRoomiidd,
+              'userNames': UserNames.join(', '), // Convert List<String> to comma-separated string
+              'LastMessage': doc['lastMessage'] as String,
+            });
+          }
         }
       });
       print(chatRoomsData);

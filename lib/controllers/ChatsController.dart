@@ -146,7 +146,7 @@ void main() async {
   await Future.delayed(Duration(seconds: 2));
   await chatsController.createChatWithMessage();*/
   LoggedUser loggedUser = LoggedUser();
-  loggedUser.setAttributes('احمد ايهاب منصور', 'male', '01093937083','te@ad', 'aidxZmxcZhbcb7gX8gCWluEQVsA2');
+  //loggedUser.setAttributes('احمد ايهاب منصور', 'male', '01093937083','te@ad', 'aidxZmxcZhbcb7gX8gCWluEQVsA2',[]);
   //test getUnseenMessagesIds
   
 }

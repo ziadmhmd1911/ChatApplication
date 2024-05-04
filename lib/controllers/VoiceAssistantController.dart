@@ -102,9 +102,11 @@ class VoiceAssitantController {
         break;
       case 'block':
         _STT.response(await blockUser(name),'male');
+        closeChat();
         break;
       case 'unblock':
         _STT.response(await unblockUser(name),'male');
+        closeChat();
         break;
       default:
         _STT.response('الأمر غير موجود','male');
@@ -115,6 +117,9 @@ class VoiceAssitantController {
     User user = await _userController.getUserByName(name);
       if (user.id == '') {
         return 'مستخدم غير موجود';
+      }
+      else if(_userController.isUserBlocked(user.id!)){
+      return 'هذا المستخدم محظور';
       }
       LoggedUser().openedChat = user.full_name!;
       Navigator.push(
@@ -156,6 +161,9 @@ class VoiceAssitantController {
     if (receiver.id == '') {
       return ('مستخدم غير موجود');
     }
+    else if(_userController.isUserBlocked(receiver.id!)){
+      return 'هذا المستخدم محظور';
+    }
       print(message);
       _chatService.SendMessage(receiver.id!, message);
       // send message to user with user.id
@@ -186,8 +194,6 @@ class VoiceAssitantController {
       for(int i = 0; i < unseenMessages.length; i++){
         if(unseenMessages[i].startsWith('https://firebasestorage.googleapis.com/'))
         {
-          //final Player = AudioPlayer();
-          //Player.play(UrlSource(unseenMessages[i]));
           await _STT.playAudio(unseenMessages[i]);
         }
         else{
@@ -237,7 +243,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  LoggedUser().setAttributes('ehab', 'male', '01093937083', 'ehab@gmail.com', 'aidxZmxcZhbcb7gX8gCWluEQVsA2');
+  //LoggedUser().setAttributes('ehab', 'male', '01093937083', 'ehab@gmail.com', 'aidxZmxcZhbcb7gX8gCWluEQVsA2',[]);
   final controller = VoiceAssitantController();
   final data = await controller.getCommandAndName('اتصل على احمد علي');
   print(data);

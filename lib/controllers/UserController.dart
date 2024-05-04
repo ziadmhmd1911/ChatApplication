@@ -63,7 +63,7 @@ class UserController {
     await blockedUserDoc.update({
       'blockedBy': FieldValue.arrayUnion([loggedUser.id]),
     });
-
+    loggedUser.blockedUsersIds.add(blockedUserId);
     return 'تم حظر المستخدم بنجاح';
   }
   
@@ -87,7 +87,11 @@ class UserController {
     await blockedUserDoc.update({
       'blockedBy': FieldValue.arrayRemove([loggedUser.id]),
     });
-
+    loggedUser.blockedUsersIds.remove(blockedUserId);
     return 'تم إلغاء حظر المستخدم بنجاح';
+  }
+
+  bool isUserBlocked(String userId){
+    return loggedUser.blockedUsersIds.contains(userId);
   }
 }
