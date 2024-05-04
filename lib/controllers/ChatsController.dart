@@ -76,25 +76,46 @@ class ChatsController {
 
   }
 
-  Future<List<String>> getUnseenMessagesIds(String chatId) async {
-    List<String> unseenMessagesIds = [];
+  Future<List<String>> getUnseenMessages(String chatId) async {
     CollectionReference messages = FirebaseFirestore.instance.collection('chatRooms').doc(chatId).collection('messages');
-    QuerySnapshot snapshot = await messages.where('receiverId', isEqualTo: LoggedUser().id).where('seen', isEqualTo: false).get();
+    QuerySnapshot snapshot = await messages.where('receiverId', isEqualTo: LoggedUser().id)
+    .where('seen', isEqualTo: false)
+    .orderBy('timestamp', descending: false)
+    .get();
+
+    List<String> unSeenMessages = [];
+    print(snapshot.docs.length);
+    print('------------------------------------');
     snapshot.docs.forEach((doc) {
-      unseenMessagesIds.add(doc.id);
+      unSeenMessages.add(doc['message']);
     });
-    return unseenMessagesIds;
+    /*snapshot.docs.forEach((doc) {
+      messages.doc(doc.id).update({'seen': true});
+    });*/
+    return unSeenMessages;
   }
 
-  Future<String> getChatId(String receiverId) async {
+  Future<String> getChatId(String receiverFullName) async {
     QuerySnapshot snapshot = await chatRooms
-      .where('participants', arrayContains: [loggedUser.id, receiverId])
+      .where('participants', arrayContains: loggedUser.fullName)
       .get();
+    print('participants:${loggedUser.fullName},$receiverFullName');
+    print(snapshot.docs.length);
     if(snapshot.docs.isEmpty) {
-      // return the id of the chat
+      print('cant find chat id');
       return '';
     }
-    return snapshot.docs[0].id;
+    String chatId = '';
+    snapshot.docs.forEach((doc) {
+      List<String> participants = doc['participants'].cast<String>();
+      if((doc['participants'][0] == loggedUser.fullName && participants[1] == receiverFullName) || 
+      (doc['participants'][1] == loggedUser.fullName && participants[0] == receiverFullName))
+      {
+        print('chat id:${doc.id}');
+        chatId = doc.id;
+      }
+    });
+    return chatId;
   }
 }
 
@@ -125,7 +146,7 @@ void main() async {
   await Future.delayed(Duration(seconds: 2));
   await chatsController.createChatWithMessage();*/
   LoggedUser loggedUser = LoggedUser();
-  loggedUser.setAttributes('ehab', 'male', '01093937083','te@ad', 'aidxZmxcZhbcb7gX8gCWluEQVsA2');
+  loggedUser.setAttributes('احمد ايهاب منصور', 'male', '01093937083','te@ad', 'aidxZmxcZhbcb7gX8gCWluEQVsA2');
   //test getUnseenMessagesIds
   
 }

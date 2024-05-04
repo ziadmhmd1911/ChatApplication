@@ -27,6 +27,7 @@ class Mo {
       'timestamp': timestamp,
       'senderName': senderName,
       'receiveName': receiveName,
+      'seen': false,
     };
   }
 }

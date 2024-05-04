@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:flutter_application_1/controllers/SpeechToTextController.dart';
 import 'package:flutter_application_1/controllers/VoiceAssistantController.dart';
 import 'package:flutter_application_1/models/loggedUser.dart';
 import 'package:flutter_application_1/screen/signup_screen.dart';
@@ -35,6 +36,7 @@ class _SignState extends State<SignInScreen> {
   bool rememberPassword = true;
   TextEditingController userName = TextEditingController();
   TextEditingController password = TextEditingController();
+  SpeechToTextController _SST = SpeechToTextController();
 
   CollectionReference users = FirebaseFirestore.instance.collection('users');
 
@@ -109,7 +111,7 @@ class _SignState extends State<SignInScreen> {
                     print(response);
                     if(response['command'] == 'textMessage'){
                       noAssist = 2;
-                      voiceAssistant.response('سجل رسالتك', 'male');
+                      _SST.response('سجل رسالتك', 'male');
                       newResponse = response;
                     }else{
                       voiceAssistant.excuteCommand(response);

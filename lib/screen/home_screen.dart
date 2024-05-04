@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/controllers/SpeechToTextController.dart';
 import 'package:flutter_application_1/controllers/VoiceAssistantController.dart';
 import 'package:flutter_application_1/screen/conversation_page.dart'; // Import the ConversationPage widget
 import 'package:flutter_application_1/screen/my_drawer.dart';
@@ -251,6 +252,7 @@ class HomePage extends StatelessWidget {
 void startListening() async {
   SpeechToText _speech = SpeechToText();
   VoiceAssitantController voiceAssistant = VoiceAssitantController();
+  SpeechToTextController _STT = SpeechToTextController();
   bool speechSuccess = await _speech.initialize();
   if (speechSuccess) {
     if (_speech.isAvailable) {
@@ -271,7 +273,7 @@ void startListening() async {
                   print(response);
                   if(response['command'] == 'textMessage'){
                     noAssist = 2;
-                    voiceAssistant.response('سجل رسالتك', 'male');
+                    _STT.response('سجل رسالتك', 'male');
                     newResponse = response;
                   }else{
                     voiceAssistant.excuteCommand(response);

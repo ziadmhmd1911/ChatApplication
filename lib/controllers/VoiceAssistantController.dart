@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/chat/chat_service.dart';
 import 'package:flutter_application_1/controllers/ChatsController.dart';
+import 'package:flutter_application_1/controllers/SpeechToTextController.dart';
 import 'package:flutter_application_1/controllers/UserController.dart';
 import 'package:flutter_application_1/firebase_options.dart';
 import 'package:flutter_application_1/models/User.dart';
@@ -23,6 +25,7 @@ class VoiceAssitantController {
   static String _api = 'http://10.0.2.2:5000';
   HttpClient _httpClient = HttpClient();
   ChatService _chatService = ChatService();
+  SpeechToTextController _STT = SpeechToTextController();
 
   Future<Map<String, dynamic>> getCommandAndName(String text) async {
     final url = Uri.parse('$_api/get-command-and-name');
@@ -74,21 +77,21 @@ class VoiceAssitantController {
     final name = data['name'];
     switch (command) {
       case 'openChat':
-        response(await openChat(name) , 'male');
+        _STT.response(await openChat(name) , 'male');
         break;
       case 'closeChat':
-        response(closeChat(), 'male');
+        _STT.response(closeChat(), 'male');
         break;
       case 'openedChat':
-        response(openedChat(),'male');
+        _STT.response(openedChat(),'male');
         break;
       case 'textMessage':
-        response(await sendTextMessageTo(name, data['message']),'male');
+        _STT.response(await sendTextMessageTo(name, data['message']),'male');
         break;
       case 'voiceMessage':
-        response(sendVoiceMessageTo(name, data['message']),'male');
+        _STT.response(sendVoiceMessageTo(name, data['message']),'male');
         break;
-      case 'unseenMessages':
+      case 'readMessages':
         unseenMessages(name);
         break;
       case 'call':
@@ -98,13 +101,13 @@ class VoiceAssitantController {
         endCall();
         break;
       case 'block':
-        response(await blockUser(name),'male');
+        _STT.response(await blockUser(name),'male');
         break;
       case 'unblock':
-        response(await unblockUser(name),'male');
+        _STT.response(await unblockUser(name),'male');
         break;
       default:
-        response('الأمر غير موجود','male');
+        _STT.response('الأمر غير موجود','male');
     }
   }
 
@@ -138,13 +141,13 @@ class VoiceAssitantController {
 
   String openedChat(){
     if(LoggedUser().openedChat=='')
-      {
-        return 'لا يوجد دردشة مفتوحة';
-      }
+    {
+      return 'لا يوجد دردشة مفتوحة';
+    }
     else
-      {
-        return 'الدردشة مفتوحة مع ${LoggedUser().openedChat}';
-      }
+    {
+      return 'الدردشة مفتوحة مع ${LoggedUser().openedChat}';
+    }
   }
 
 
@@ -169,17 +172,31 @@ class VoiceAssitantController {
     return 'تم إرسال الرسالة الصوتية إلى $name';
   }
 
-  Future<Map<String, dynamic>> unseenMessages(String name) async {
+  void unseenMessages(String name) async {
     User sender = await _userController.getUserByName(name);
     if (sender.id == '') {
-      return {'error': 'مستخدم غير موجود'};
+      _STT.response('مستخدم غير موجود', 'male');
     }
-    String cahtId = await _chatsController.getChatId(sender.id!);
-    return {
-      'unseenMessagesIds': _chatsController.getUnseenMessagesIds(cahtId),
-      'chatId': cahtId,
-      'senderId': sender.id,
-    };
+    String chatRoomId = await _chatsController.getChatId(sender.full_name!);
+    List<String> unseenMessages = await _chatsController.getUnseenMessages(chatRoomId);
+    if (unseenMessages.isEmpty){
+      _STT.response('لا توجد رسائل غير مقروأة','male');
+    }
+    else{
+      for(int i = 0; i < unseenMessages.length; i++){
+        if(unseenMessages[i].startsWith('https://firebasestorage.googleapis.com/'))
+        {
+          //final Player = AudioPlayer();
+          //Player.play(UrlSource(unseenMessages[i]));
+          await _STT.playAudio(unseenMessages[i]);
+        }
+        else{
+          print('message number $i: ${unseenMessages[i]}');
+          await _STT.blockingResponse(unseenMessages[i],'male');
+          await Future.delayed(Duration(seconds: 1));
+        }
+      }
+    }
   }
 
   String call(String name) {
@@ -212,35 +229,6 @@ class VoiceAssitantController {
     }
     return _userController.unblockUser(blockedUser.id!);
   }
-
-  void response(String text, String? gender) async {
-    if(gender == null)
-      gender = 'male';
-    FlutterTts flutterTts = FlutterTts();
-    // flutterTts.speak(text);
-    if (gender == 'male') {
-      await flutterTts.setVoice({"name": "ar-xa-x-ard-local", "locale": "ar"});
-      //Ard -> Male ,, Arz -> Female
-      await flutterTts.setSpeechRate(0.5);
-      // Set the volume to 1.0
-      await flutterTts.setVolume(1.0);
-      // Set the pitch to 1.0
-      await flutterTts.setPitch(1.0);
-      // Speak the message
-      await flutterTts.speak(text);
-    }
-    else {
-      await flutterTts.setVoice({"name": "ar-xa-x-arz-local", "locale": "ar"});
-      //Ard -> Male ,, Arz -> Female
-      await flutterTts.setSpeechRate(0.5);
-      // Set the volume to 1.0
-      await flutterTts.setVolume(1.0);
-      // Set the pitch to 1.0
-      await flutterTts.setPitch(1.0);
-      // Speak the message
-      await flutterTts.speak(text);
-    }
-  }
 }
 
 // main function to test the VoiceAssistantController
@@ -253,5 +241,5 @@ void main() async {
   final controller = VoiceAssitantController();
   final data = await controller.getCommandAndName('اتصل على احمد علي');
   print(data);
-  print(await controller.unseenMessages('bely'));
+  //print(await controller.unseenMessages('bely'));
 }
