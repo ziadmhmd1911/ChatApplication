@@ -89,9 +89,9 @@ class ChatsController {
     snapshot.docs.forEach((doc) {
       unSeenMessages.add(doc['message']);
     });
-    /*snapshot.docs.forEach((doc) {
+    snapshot.docs.forEach((doc) {
       messages.doc(doc.id).update({'seen': true});
-    });*/
+    });
     return unSeenMessages;
   }
 

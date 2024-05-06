@@ -11,6 +11,7 @@ import 'package:flutter_application_1/controllers/UserController.dart';
 import 'package:flutter_application_1/firebase_options.dart';
 import 'package:flutter_application_1/models/User.dart';
 import 'package:flutter_application_1/models/loggedUser.dart';
+import 'package:flutter_application_1/screen/RecodingScreen.dart';
 import 'package:flutter_application_1/screen/conversation_page.dart';
 import 'package:flutter_application_1/screen/home_screen.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -89,7 +90,7 @@ class VoiceAssitantController {
         _STT.response(await sendTextMessageTo(name, data['message']),'male');
         break;
       case 'voiceMessage':
-        _STT.response(sendVoiceMessageTo(name, data['message']),'male');
+        await sendVoiceMessageTo(name);
         break;
       case 'readMessages':
         unseenMessages(name);
@@ -170,14 +171,17 @@ class VoiceAssitantController {
     return 'تم إرسال الرسالة إلى $name';
   }
 
-  String sendVoiceMessageTo(String name, String message) {
-    _userController.getUserByName(name).then((user) {
-      if (user.id == '') {
-        return 'مستخدم غير موجود';
-      }
-      // send voice message to user with user.id
-    });
-    return 'تم إرسال الرسالة الصوتية إلى $name';
+  Future<void> sendVoiceMessageTo(String name) async{
+    User receiver = await _userController.getUserByName(name);
+    if (receiver.id == '') {
+      _STT.response('مستخدم غير موجود', 'male');
+    }
+    Navigator.push(
+      context!,
+      MaterialPageRoute(
+        builder: (context) => FullScreenButtonPage(receiver:receiver),
+      ),
+    );
   }
 
   void unseenMessages(String name) async {
